@@ -28,7 +28,7 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 {
   "fileId": "", // use whatever id you want
   "uri": "name@name.com/file.jpg" // should be the URI

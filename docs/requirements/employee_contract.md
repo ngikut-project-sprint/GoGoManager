@@ -20,7 +20,7 @@ Request Header:
 
 Request Body:
 
-```json
+```js
 {
   "identityNumber": "", // string | minlength 5 | maxlength 33
   "name": "", // string | minlength 4 | maxlength 33
@@ -34,7 +34,7 @@ Response:
 
 - `201` Created
 
-```json
+```js
 {
   "identityNumber": "",
   "name": "",
@@ -74,16 +74,16 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 [
   {
-    "identityNumber": "",
-    "name": "",
-    "employeeImageUri": "",
-    "gender": "",
-    "departmentId": ""
-  }
-]
+    identityNumber: "",
+    name: "",
+    employeeImageUri: "",
+    gender: "",
+    departmentId: "",
+  },
+];
 ```
 
 - `401` Unauthorized for:
@@ -100,7 +100,7 @@ Request Header:
 
 Request Body:
 
-```json
+```js
 {
   "identityNumber": "", // string | minlength 5 | maxlength 33
   "name": "", // string | minlength 4 | maxlength 33
@@ -114,7 +114,7 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 {
   "identityNumber": "",
   "name": "",

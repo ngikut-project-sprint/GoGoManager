@@ -20,7 +20,7 @@ Request Header:
 
 Request Body:
 
-```json
+```js
 {
   "name": "" // string | minlength 4 | maxlength 33
 }
@@ -30,7 +30,7 @@ Response:
 
 - `201` Created
 
-```json
+```js
 {
   "departmentId": "", // use any id you want
   "name": ""
@@ -59,13 +59,13 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 [
   {
-    "departmentId": "",
-    "name": ""
-  }
-]
+    departmentId: "",
+    name: "",
+  },
+];
 ```
 
 - `401` Unauthorized for:
@@ -82,7 +82,7 @@ Request Header:
 
 Request Body:
 
-```json
+```js
 {
   "name": "" // string | minlength 4 | maxlength 33
 }
@@ -92,7 +92,7 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 {
   "departmentId": "", // use any id you want
   "name": ""

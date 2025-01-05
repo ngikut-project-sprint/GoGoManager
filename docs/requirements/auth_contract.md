@@ -14,7 +14,7 @@ Manager can register to the app and start manage their employee
 
 Request Body:
 
-```json
+```js
 {
   "email": "name@name.com", // should in email format
   "password": "asdfasdf", // string | minLength: 8 | maxLength: 32
@@ -26,7 +26,7 @@ Response:
 
 - `200` Ok for existing user
 
-```json
+```js
 {
   "email": "name@name.com",
   "token": "asdfasdf" // use any token you want
@@ -35,7 +35,7 @@ Response:
 
 - `201` Created for new user
 
-```json
+```js
 {
   "email": "name@name.com",
   "token": "asdfasdf" // use any token you want

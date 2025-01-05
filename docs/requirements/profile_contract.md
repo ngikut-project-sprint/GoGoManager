@@ -22,7 +22,7 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 {
   "email": "name@name.com",
   "name": "",
@@ -46,7 +46,7 @@ Request Header:
 
 Request Body:
 
-```json
+```js
 {
   "email": "name@name.com", // should in email format
   "name": "", // string | minLength 4 | maxLength 52
@@ -60,7 +60,7 @@ Response:
 
 - `200` Ok
 
-```json
+```js
 {
   "email": "name@name.com",
   "name": "",
