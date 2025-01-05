@@ -7,6 +7,7 @@ This document is a place to dump and share resources related to learning Golang.
 ## Documents
 
 - https://quii.gitbook.io/learn-go-with-tests
+- https://go-blueprint.dev
 
 ## Videos
 
