@@ -12,3 +12,8 @@ type Credential struct {
 	Password string     `json:"password"`
 	Action   AuthAction `json:"action"`
 }
+
+type AuthResponse struct {
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
