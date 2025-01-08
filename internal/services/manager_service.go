@@ -6,6 +6,7 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
 type ManagerService interface {
@@ -25,18 +26,14 @@ func NewManagerService(managerRepo repositories.ManagerRepository) ManagerServic
 }
 
 func (s *managerService) Create(email string, password string) (int, *utils.GoGoError) {
-	err := utils.ValidateEmail(email)
-	if err != nil {
-		return 0, utils.WrapError(err, utils.InvalidEmailFormat, "Invalid email format")
+	emailErr := validators.ValidateEmail(email)
+	if emailErr != nil {
+		return 0, utils.WrapError(emailErr, utils.InvalidEmailFormat, "Invalid email format")
 	}
 
-	passwordLength := len(password)
-	if passwordLength < 8 {
-		return 0, utils.WrapError(err, utils.InvalidPasswordLength, "Password too short (> 8 characters)")
-	}
-
-	if passwordLength > 52 {
-		return 0, utils.WrapError(err, utils.InvalidPasswordLength, "Password too long (< 52 characters)")
+	pwdErr := validators.ValidatePassword(password, 8, 52)
+	if pwdErr != nil {
+		return 0, utils.WrapError(pwdErr, utils.InvalidPasswordLength, "Invalid password length")
 	}
 
 	return s.managerRepo.Create(email, password)
@@ -56,7 +53,7 @@ func (s *managerService) GetByID(id int) (*models.Manager, *utils.GoGoError) {
 }
 
 func (s *managerService) GetByEmail(email string) (*models.Manager, *utils.GoGoError) {
-	err := utils.ValidateEmail(email)
+	err := validators.ValidateEmail(email)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.InvalidEmailFormat, "Invalid email format")
 	}

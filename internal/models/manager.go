@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
 type Manager struct {
@@ -20,7 +20,7 @@ type Manager struct {
 }
 
 func (m Manager) ValidEmail() bool {
-	err := utils.ValidateEmail(m.Email)
+	err := validators.ValidateEmail(m.Email)
 	return err == nil
 }
 
@@ -35,7 +35,7 @@ func (m Manager) ValidName() bool {
 }
 
 func (m Manager) ValidImageURI() bool {
-	err := utils.ValidateURI(*m.UserImageUri)
+	err := validators.ValidateURI(*m.UserImageUri)
 	return err == nil
 }
 
@@ -45,6 +45,6 @@ func (m Manager) ValidCompanyName() bool {
 }
 
 func (m Manager) ValidCompanyImageURI() bool {
-	err := utils.ValidateURI(*m.CompanyImageUri)
+	err := validators.ValidateURI(*m.CompanyImageUri)
 	return err == nil
 }
