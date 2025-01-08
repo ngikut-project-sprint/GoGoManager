@@ -7,6 +7,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
@@ -33,6 +35,13 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cfg, ok := r.Context().Value(constants.ConfigKey).(*config.Config)
+	if !ok {
+		log.Println("Configuration not found")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	switch credential.Action {
 	case utils.Register:
 		manager_id, sqlErr := h.managerService.Create(credential.Email, credential.Password)
@@ -54,7 +63,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		token, err := utils.GenerateJWT(manager_id, credential.Email)
+		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager_id, credential.Email)
 		if err != nil {
 			log.Println("Failed to generate JWT:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -95,9 +104,9 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		token, err := utils.GenerateJWT(manager.ID, manager.Email)
+		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager.ID, manager.Email)
 		if err != nil {
-			log.Println("Failed to generate JWT for user", manager.ID, " :", err)
+			log.Printf("Failed to generate JWT for user %d: %v", manager.ID, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -109,7 +118,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
-			log.Println("Failed to marshal response for user", manager.ID, " :", err)
+			log.Printf("Failed to marshal response for user %d: %v", manager.ID, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -118,7 +127,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 		if _, err := w.Write(jsonResponse); err != nil {
-			log.Println("Failed to write response for user", manager.ID, " :", err)
+			log.Printf("Failed to write response for user %d: %v", manager.ID, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}

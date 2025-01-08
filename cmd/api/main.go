@@ -28,7 +28,7 @@ func main() {
 	defer db.Close()
 
 	// Setup router and handlers
-	mux := routes.NewRouter(db)
+	mux := routes.NewRouter(cfg, db)
 	log.Fatal(http.ListenAndServe(":8080", mux))
 
 	// Start the web server in a goroutine

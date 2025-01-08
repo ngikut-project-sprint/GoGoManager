@@ -4,24 +4,27 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/handlers"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 )
 
-func NewRouter(db *sql.DB) *http.ServeMux {
+func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
-	ManagerRouter(mux, db)
+	ManagerRouter(mux, cfg, db)
 	return mux
 }
 
-func ManagerRouter(mux *http.ServeMux, db *sql.DB) {
+func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	repo := repositories.NewManagerRepository(db)
 	service := services.NewManagerService(repo)
-	AuthRouter(mux, service)
+	AuthRouter(mux, cfg, service)
 }
 
-func AuthRouter(mux *http.ServeMux, manager_service services.ManagerService) {
+func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {
 	handler := handlers.NewAuthHandler(manager_service)
-	mux.HandleFunc("/auth", handler.Auth)
+	mux.Handle("/auth", middleware.ConfigMiddleware(cfg, http.HandlerFunc(handler.Auth)))
+	mux.Handle("/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(http.HandlerFunc(handlers.ExampleSecureHander))))
 }

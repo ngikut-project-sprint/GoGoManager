@@ -6,18 +6,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JwtSecret = []byte("this-is-a-rainy-day")
+type Claims struct {
+	ID    int    `json:"id"`
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
 
-func GenerateJWT(id int, email string) (string, error) {
-	claims := jwt.MapClaims{
-		"id":    id,
-		"email": email,
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+func GenerateJWT(secret string, id int, email string) (string, error) {
+	claims := &Claims{
+		ID:    id,
+		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString(JwtSecret)
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return "", err
 	}
