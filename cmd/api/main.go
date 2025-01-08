@@ -40,14 +40,4 @@ func initSQLDatabase(dbCfg config.DatabaseConfig) {
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
-
-	fmt.Printf(
-		"Success connect to postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		dbCfg.Username,
-		dbCfg.Password,
-		dbCfg.Host,
-		dbCfg.Port,
-		dbCfg.Database,
-		dbCfg.SslMode,
-	)
 }
