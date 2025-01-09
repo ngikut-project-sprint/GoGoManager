@@ -1,7 +1,6 @@
-package repositories
+package repository
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/database"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
@@ -21,25 +21,30 @@ type ManagerRepository interface {
 	Update(manager *models.Manager) *utils.GoGoError
 }
 
+type HashPassword func(password []byte, cost int) ([]byte, error)
+
 type managerRepository struct {
-	db *sql.DB
+	db           database.DB
+	hashPassword HashPassword
 }
 
-func NewManagerRepository(db *sql.DB) ManagerRepository {
-	return &managerRepository{db: db}
+func NewManagerRepository(db database.DB, hashPassword HashPassword) ManagerRepository {
+	return &managerRepository{db: db, hashPassword: hashPassword}
 }
 
 func (r *managerRepository) Create(email string, password string) (int, *utils.GoGoError) {
 	// Hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := r.hashPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return 0, utils.WrapError(err, utils.PasswordHashFailed, "Failed to hash password")
 	}
 
 	// Insert new manager
 	query := "INSERT INTO managers (email, password) VALUES ($1, $2) RETURNING id"
+	row := r.db.QueryRow(query, email, string(hashedPassword))
+
 	var id int
-	error := r.db.QueryRow(query, email, hashedPassword).Scan(&id)
+	error := row.Scan(&id)
 	if error != nil {
 		if uniqueErr := utils.UniqueConstraintError(error); uniqueErr != nil {
 			return 0, utils.WrapError(error, utils.SQLUniqueViolated, "Email already registered")

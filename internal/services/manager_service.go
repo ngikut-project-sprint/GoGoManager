@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
-	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
@@ -18,10 +18,10 @@ type ManagerService interface {
 }
 
 type managerService struct {
-	managerRepo repositories.ManagerRepository
+	managerRepo repository.ManagerRepository
 }
 
-func NewManagerService(managerRepo repositories.ManagerRepository) ManagerService {
+func NewManagerService(managerRepo repository.ManagerRepository) ManagerService {
 	return &managerService{managerRepo: managerRepo}
 }
 

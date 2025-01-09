@@ -4,10 +4,13 @@ import (
 	"database/sql"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/database"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/handlers"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
-	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 )
 
@@ -18,7 +21,8 @@ func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 }
 
 func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
-	repo := repositories.NewManagerRepository(db)
+	dbAdapter := &database.SqlDBAdapter{DB: db}
+	repo := repository.NewManagerRepository(dbAdapter, bcrypt.GenerateFromPassword)
 	service := services.NewManagerService(repo)
 	AuthRouter(mux, cfg, service)
 }
