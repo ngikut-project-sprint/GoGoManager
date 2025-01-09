@@ -12,6 +12,7 @@ type EmployeeRepository interface {
 	List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error)
 	Create(ctx context.Context, employee *models.Employee) (*models.Employee, error)
 	Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error)
+	Delete(ctx context.Context, identityNumber string) error
 }
 
 type employeeRepository struct {
@@ -181,4 +182,28 @@ func (r *employeeRepository) Update(ctx context.Context, identityNumber string, 
 	}
 
 	return &employee, nil
+}
+
+func (r *employeeRepository) Delete(ctx context.Context, identityNumber string) error {
+	query := `
+			UPDATE employees 
+			SET deleted_at = NOW() 
+			WHERE identity_number = $1 AND deleted_at IS NULL
+	`
+
+	result, err := r.db.ExecContext(ctx, query, identityNumber)
+	if err != nil {
+		return fmt.Errorf("error deleting employee: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error checking deletion result: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("employee not found")
+	}
+
+	return nil
 }

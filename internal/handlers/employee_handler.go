@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
@@ -140,4 +142,48 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identit
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request, identityNumber string) {
+	err := h.service.Delete(r.Context(), identityNumber)
+	if err != nil {
+		// Create response struct for error cases
+		type ErrorResponse struct {
+			Message string `json:"message"`
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		switch {
+		case err.Error() == "employee not found":
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(ErrorResponse{
+				Message: fmt.Sprintf("identityNumber %s is not found", identityNumber),
+			})
+			return
+
+		case strings.Contains(err.Error(), "unauthorized") ||
+			strings.Contains(err.Error(), "expired token") ||
+			strings.Contains(err.Error(), "invalid token"):
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorResponse{
+				Message: "expired / invalid / missing request token",
+			})
+			return
+
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(ErrorResponse{
+				Message: "Server Error",
+			})
+			return
+		}
+	}
+
+	// Success case - 200 OK with message
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK) // 200
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Ok deleted",
+	})
 }

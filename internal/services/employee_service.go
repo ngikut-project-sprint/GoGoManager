@@ -11,6 +11,7 @@ type EmployeeService interface {
 	List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error)
 	Create(ctx context.Context, req models.CreateEmployeeRequest) (*models.Employee, error)
 	Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error)
+	Delete(ctx context.Context, identityNumber string) error
 }
 
 type employeeService struct {
@@ -49,4 +50,8 @@ func (s *employeeService) Create(ctx context.Context, req models.CreateEmployeeR
 
 func (s *employeeService) Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error) {
 	return s.repo.Update(ctx, identityNumber, req)
+}
+
+func (s *employeeService) Delete(ctx context.Context, identityNumber string) error {
+	return s.repo.Delete(ctx, identityNumber)
 }

@@ -44,14 +44,9 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 		})),
 	))
 
-	// Handle /v1/employee/{identityNumber} for PATCH
+	// Handle /v1/employee/{identityNumber} for PATCH and DELETE
 	mux.Handle("/v1/employee/", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != http.MethodPatch {
-				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-				return
-			}
-
 			// Extract identityNumber from path
 			identityNumber := strings.TrimPrefix(r.URL.Path, "/v1/employee/")
 			if identityNumber == "" {
@@ -59,7 +54,14 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 				return
 			}
 
-			handler.Update(w, r, identityNumber)
+			switch r.Method {
+			case http.MethodPatch:
+				handler.Update(w, r, identityNumber)
+			case http.MethodDelete:
+				handler.Delete(w, r, identityNumber)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
 		})),
 	))
 }
