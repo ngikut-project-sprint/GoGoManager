@@ -97,8 +97,24 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Create new employee
 	employee, err := h.service.Create(r.Context(), req)
 	if err != nil {
-		http.Error(w, "Failed to create employee", http.StatusInternalServerError)
-		return
+		// Create response struct for error cases
+		type ErrorResponse struct {
+			Message string `json:"message"`
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		switch {
+		case strings.Contains(err.Error(), "unique_identity_number"):
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(ErrorResponse{
+				Message: fmt.Sprintf("Identity number %s is already registered", req.IdentityNumber),
+			})
+			return
+		default:
+			http.Error(w, "Failed to create employee", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Prepare response
