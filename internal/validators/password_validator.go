@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+type PasswordValidator interface {
+	ValidatePassword(password string, min int, max int) error
+}
+
 func ValidatePassword(password string, min int, max int) error {
 	passwordLength := len(password)
 	if passwordLength < min {

@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+type EmailValidator interface {
+	ValidateEmail(email string) error
+}
+
 func ValidateEmail(email string) error {
 	// Regex structure validation
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`

@@ -12,6 +12,7 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
 func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
@@ -23,7 +24,7 @@ func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	dbAdapter := &database.SqlDBAdapter{DB: db}
 	repo := repository.NewManagerRepository(dbAdapter, bcrypt.GenerateFromPassword)
-	service := services.NewManagerService(repo)
+	service := services.NewManagerService(repo, validators.ValidateEmail, validators.ValidatePassword)
 	AuthRouter(mux, cfg, service)
 }
 

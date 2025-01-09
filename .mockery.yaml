@@ -21,3 +21,9 @@ packages:
       dir: mocks/utils
     interfaces:
       Encryption:
+  github.com/ngikut-project-sprint/GoGoManager/internal/validators:
+    config:
+      dir: mocks/validators
+    interfaces:
+      EmailValidator:
+      PasswordValidator:

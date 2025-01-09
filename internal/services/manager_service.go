@@ -6,7 +6,6 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
-	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
 type ManagerService interface {
@@ -17,21 +16,31 @@ type ManagerService interface {
 	Update(manager *models.Manager) *utils.GoGoError
 }
 
+type ValidEmailFunc func(email string) error
+
+type ValidPasswordFunc func(email string, min int, max int) error
+
 type managerService struct {
-	managerRepo repository.ManagerRepository
+	managerRepo      repository.ManagerRepository
+	validateEmail    ValidEmailFunc
+	validatePassword ValidPasswordFunc
 }
 
-func NewManagerService(managerRepo repository.ManagerRepository) ManagerService {
-	return &managerService{managerRepo: managerRepo}
+func NewManagerService(
+	managerRepo repository.ManagerRepository,
+	validateEmail ValidEmailFunc,
+	validatePassword ValidPasswordFunc,
+) ManagerService {
+	return &managerService{managerRepo: managerRepo, validateEmail: validateEmail, validatePassword: validatePassword}
 }
 
 func (s *managerService) Create(email string, password string) (int, *utils.GoGoError) {
-	emailErr := validators.ValidateEmail(email)
+	emailErr := s.validateEmail(email)
 	if emailErr != nil {
 		return 0, utils.WrapError(emailErr, utils.InvalidEmailFormat, "Invalid email format")
 	}
 
-	pwdErr := validators.ValidatePassword(password, 8, 52)
+	pwdErr := s.validatePassword(password, 8, 52)
 	if pwdErr != nil {
 		return 0, utils.WrapError(pwdErr, utils.InvalidPasswordLength, "Invalid password length")
 	}
@@ -53,7 +62,7 @@ func (s *managerService) GetByID(id int) (*models.Manager, *utils.GoGoError) {
 }
 
 func (s *managerService) GetByEmail(email string) (*models.Manager, *utils.GoGoError) {
-	err := validators.ValidateEmail(email)
+	err := s.validateEmail(email)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.InvalidEmailFormat, "Invalid email format")
 	}
