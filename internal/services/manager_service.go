@@ -54,7 +54,7 @@ func (s *managerService) GetAll() ([]models.Manager, *utils.GoGoError) {
 
 func (s *managerService) GetByID(id int) (*models.Manager, *utils.GoGoError) {
 	if id <= 0 {
-		err := errors.New("Invalid sql id")
+		err := errors.New("invalid sql id")
 		return nil, utils.WrapError(err, utils.InvalidUserId, "Invalid manager id")
 	}
 

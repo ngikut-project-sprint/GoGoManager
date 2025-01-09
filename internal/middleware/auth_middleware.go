@@ -66,6 +66,8 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), constants.JWTKey, claims)
+		ctx = context.WithValue(ctx, "user_id", claims.ID) // Add user_id separately for easy access
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
