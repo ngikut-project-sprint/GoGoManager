@@ -9,6 +9,7 @@ import (
 
 type EmployeeService interface {
 	List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error)
+	Create(ctx context.Context, req models.CreateEmployeeRequest) (*models.Employee, error)
 }
 
 type employeeService struct {
@@ -31,4 +32,16 @@ func (s *employeeService) List(ctx context.Context, filter models.FilterOptions)
 	}
 
 	return s.repo.List(ctx, filter)
+}
+
+func (s *employeeService) Create(ctx context.Context, req models.CreateEmployeeRequest) (*models.Employee, error) {
+	employee := &models.Employee{
+		IdentityNumber:   req.IdentityNumber,
+		Name:             req.Name,
+		EmployeeImageURI: req.EmployeeImageURI,
+		Gender:           req.Gender,
+		DepartmentID:     req.DepartmentID,
+	}
+
+	return s.repo.Create(ctx, employee)
 }

@@ -83,3 +83,32 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var req models.CreateEmployeeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Create new employee
+	employee, err := h.service.Create(r.Context(), req)
+	if err != nil {
+		http.Error(w, "Failed to create employee", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	response := EmployeeResponse{
+		IdentityNumber:   employee.IdentityNumber,
+		Name:             employee.Name,
+		EmployeeImageUri: employee.EmployeeImageURI,
+		Gender:           string(employee.Gender),
+		DepartmentId:     employee.DepartmentID,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+}

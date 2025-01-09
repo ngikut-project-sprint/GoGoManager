@@ -10,6 +10,7 @@ import (
 
 type EmployeeRepository interface {
 	List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error)
+	Create(ctx context.Context, employee *models.Employee) (*models.Employee, error)
 }
 
 type employeeRepository struct {
@@ -81,4 +82,42 @@ func (r *employeeRepository) List(ctx context.Context, filter models.FilterOptio
 	}
 
 	return employees, nil
+}
+
+func (r *employeeRepository) Create(ctx context.Context, employee *models.Employee) (*models.Employee, error) {
+	query := `
+			INSERT INTO employees (
+					identity_number, name, employee_image_uri, gender, department_id,
+					created_at, updated_at
+			) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+			RETURNING id, identity_number, name, employee_image_uri, gender, department_id, 
+								created_at, updated_at, deleted_at
+	`
+
+	row := r.db.QueryRowContext(
+		ctx,
+		query,
+		employee.IdentityNumber,
+		employee.Name,
+		employee.EmployeeImageURI,
+		employee.Gender,
+		employee.DepartmentID,
+	)
+
+	err := row.Scan(
+		&employee.ID,
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+		&employee.CreatedAt,
+		&employee.UpdatedAt,
+		&employee.DeletedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error creating employee: %w", err)
+	}
+
+	return employee, nil
 }

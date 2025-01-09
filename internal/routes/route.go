@@ -33,11 +33,14 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	// Register routes without auth middleware for GET
 	mux.Handle("/v1/employee", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.Method == http.MethodGet {
+			switch r.Method {
+			case http.MethodGet:
 				handler.List(w, r)
-				return
+			case http.MethodPost:
+				handler.Create(w, r)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		})),
 	))
 }
