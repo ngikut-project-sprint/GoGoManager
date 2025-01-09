@@ -14,6 +14,7 @@ import (
 func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
 	ManagerRouter(mux, cfg, db)
+	DepartmentRouter(mux, cfg, db)
 	return mux
 }
 
@@ -27,4 +28,15 @@ func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services
 	handler := handlers.NewAuthHandler(manager_service)
 	mux.Handle("/auth", middleware.ConfigMiddleware(cfg, http.HandlerFunc(handler.Auth)))
 	mux.Handle("/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(http.HandlerFunc(handlers.ExampleSecureHander))))
+}
+
+func DepartmentRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
+    repo := repositories.NewDepartmentRepository(db)
+    service := services.NewDepartmentService(repo)
+    handler := handlers.NewDepartmentHandler(service)
+
+    mux.Handle("/department", middleware.ConfigMiddleware(cfg, 
+        middleware.AuthMiddleware(http.HandlerFunc(handler.HandleDepartment))))
+    mux.Handle("/department/", middleware.ConfigMiddleware(cfg, 
+        middleware.AuthMiddleware(http.HandlerFunc(handler.HandleDepartmentWithID))))
 }
