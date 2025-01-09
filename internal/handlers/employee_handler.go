@@ -80,11 +80,6 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Initialize empty array if nil
-	if response == nil { // ✅ Check response array
-		response = []EmployeeResponse{}
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
@@ -32,14 +31,15 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	handler := handlers.NewEmployeeHandler(service)
 
 	// Register routes without auth middleware for GET
-	mux.HandleFunc("/v1/employee", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Iqbal ganteng")
-		if r.Method == http.MethodGet {
-			handler.List(w, r)
-			return
-		}
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	})
+	mux.Handle("/v1/employee", middleware.ConfigMiddleware(cfg,
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodGet {
+				handler.List(w, r)
+				return
+			}
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		})),
+	))
 }
 
 func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {
