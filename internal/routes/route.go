@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/handlers"
@@ -25,12 +26,11 @@ func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 }
 
 func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
-	// Initialize repository, service, and handler
 	repo := repositories.NewEmployeeRepository(db)
 	service := services.NewEmployeeService(repo)
 	handler := handlers.NewEmployeeHandler(service)
 
-	// Register routes without auth middleware for GET
+	// Handle /v1/employee for GET (list) and POST (create)
 	mux.Handle("/v1/employee", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
@@ -41,6 +41,25 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
+		})),
+	))
+
+	// Handle /v1/employee/{identityNumber} for PATCH
+	mux.Handle("/v1/employee/", middleware.ConfigMiddleware(cfg,
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPatch {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Extract identityNumber from path
+			identityNumber := strings.TrimPrefix(r.URL.Path, "/v1/employee/")
+			if identityNumber == "" {
+				http.Error(w, "Missing employee identity number", http.StatusBadRequest)
+				return
+			}
+
+			handler.Update(w, r, identityNumber)
 		})),
 	))
 }

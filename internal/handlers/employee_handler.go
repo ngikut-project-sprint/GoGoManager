@@ -112,3 +112,32 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
 }
+
+func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identityNumber string) {
+	// Decode request body
+	var req models.UpdateEmployeeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Update employee
+	employee, err := h.service.Update(r.Context(), identityNumber, req)
+	if err != nil {
+		http.Error(w, "Failed to update employee", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	response := EmployeeResponse{
+		IdentityNumber:   employee.IdentityNumber,
+		Name:             employee.Name,
+		EmployeeImageUri: employee.EmployeeImageURI,
+		Gender:           string(employee.Gender),
+		DepartmentId:     employee.DepartmentID,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}

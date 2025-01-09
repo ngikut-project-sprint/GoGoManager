@@ -11,6 +11,7 @@ import (
 type EmployeeRepository interface {
 	List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error)
 	Create(ctx context.Context, employee *models.Employee) (*models.Employee, error)
+	Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error)
 }
 
 type employeeRepository struct {
@@ -120,4 +121,64 @@ func (r *employeeRepository) Create(ctx context.Context, employee *models.Employ
 	}
 
 	return employee, nil
+}
+
+func (r *employeeRepository) Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error) {
+	// Build dynamic update query
+	query := "UPDATE employees SET updated_at = NOW()"
+	args := []interface{}{}
+	argCount := 1
+
+	// Only include fields that are provided in the request
+	if req.Name != nil {
+		query += fmt.Sprintf(", name = $%d", argCount)
+		args = append(args, *req.Name)
+		argCount++
+	}
+	if req.EmployeeImageURI != nil {
+		query += fmt.Sprintf(", employee_image_uri = $%d", argCount)
+		args = append(args, *req.EmployeeImageURI)
+		argCount++
+	}
+	if req.Gender != nil {
+		query += fmt.Sprintf(", gender = $%d", argCount)
+		args = append(args, *req.Gender)
+		argCount++
+	}
+	if req.DepartmentID != nil {
+		query += fmt.Sprintf(", department_id = $%d", argCount)
+		args = append(args, *req.DepartmentID)
+		argCount++
+	}
+	if req.IdentityNumber != nil {
+		query += fmt.Sprintf(", identity_number = $%d", argCount)
+		args = append(args, *req.IdentityNumber)
+		argCount++
+	}
+
+	// Add WHERE clause and RETURNING
+	query += fmt.Sprintf(" WHERE identity_number = $%d AND deleted_at IS NULL", argCount)
+	args = append(args, identityNumber)
+	query += " RETURNING id, identity_number, name, employee_image_uri, gender, department_id, created_at, updated_at, deleted_at"
+
+	var employee models.Employee
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(
+		&employee.ID,
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+		&employee.CreatedAt,
+		&employee.UpdatedAt,
+		&employee.DeletedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("employee not found")
+		}
+		return nil, fmt.Errorf("error updating employee: %w", err)
+	}
+
+	return &employee, nil
 }
