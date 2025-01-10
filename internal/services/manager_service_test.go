@@ -33,6 +33,8 @@ func TestManagerService_CreateManagers_Success(t *testing.T) {
 	assert.Equal(t, id, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_CreateManagers_InvalidEmail(t *testing.T) {
@@ -58,6 +60,8 @@ func TestManagerService_CreateManagers_InvalidEmail(t *testing.T) {
 	assert.Equal(t, 0, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_CreateManagers_InvalidPassword(t *testing.T) {
@@ -84,6 +88,8 @@ func TestManagerService_CreateManagers_InvalidPassword(t *testing.T) {
 	assert.Equal(t, 0, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetAllManagers_Success(t *testing.T) {
@@ -127,6 +133,8 @@ func TestManagerService_GetAllManagers_Success(t *testing.T) {
 	assert.Equal(t, mockManagers, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetAllManagers_Error(t *testing.T) {
@@ -176,6 +184,8 @@ func TestManagerService_GetByIDManager_Success(t *testing.T) {
 	assert.Equal(t, manager, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetByIDManager_InvalidID(t *testing.T) {
@@ -198,6 +208,8 @@ func TestManagerService_GetByIDManager_InvalidID(t *testing.T) {
 	assert.Nil(t, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetByIDManager_Error(t *testing.T) {
@@ -217,6 +229,8 @@ func TestManagerService_GetByIDManager_Error(t *testing.T) {
 	assert.Nil(t, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetByEmailManager_Success(t *testing.T) {
@@ -249,6 +263,8 @@ func TestManagerService_GetByEmailManager_Success(t *testing.T) {
 	assert.Equal(t, manager, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetByEmailManager_InvalidEmail(t *testing.T) {
@@ -273,6 +289,8 @@ func TestManagerService_GetByEmailManager_InvalidEmail(t *testing.T) {
 	assert.Nil(t, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_GetByEmailManager_Error(t *testing.T) {
@@ -293,6 +311,8 @@ func TestManagerService_GetByEmailManager_Error(t *testing.T) {
 	assert.Nil(t, res)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_UpdateManager_Success(t *testing.T) {
@@ -321,6 +341,8 @@ func TestManagerService_UpdateManager_Success(t *testing.T) {
 	utils.NoError(t, err)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 func TestManagerService_UpdateManager_Error(t *testing.T) {
@@ -351,6 +373,8 @@ func TestManagerService_UpdateManager_Error(t *testing.T) {
 	utils.Error(t, err)
 
 	mockRepo.AssertExpectations(t)
+	mockEmailValidator.AssertExpectations(t)
+	mockPwdValidator.AssertExpectations(t)
 }
 
 // Helper

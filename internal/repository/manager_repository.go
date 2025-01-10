@@ -21,14 +21,12 @@ type ManagerRepository interface {
 	Update(manager *models.Manager) *utils.GoGoError
 }
 
-type HashPassword func(password []byte, cost int) ([]byte, error)
-
 type managerRepository struct {
 	db           database.DB
-	hashPassword HashPassword
+	hashPassword utils.HashPassword
 }
 
-func NewManagerRepository(db database.DB, hashPassword HashPassword) ManagerRepository {
+func NewManagerRepository(db database.DB, hashPassword utils.HashPassword) ManagerRepository {
 	return &managerRepository{db: db, hashPassword: hashPassword}
 }
 

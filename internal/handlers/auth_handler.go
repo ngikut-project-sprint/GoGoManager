@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
@@ -15,10 +13,16 @@ import (
 
 type AuthHandler struct {
 	managerService services.ManagerService
+	getJWT         utils.GetJWT
+	pwdComparator  utils.ComparePassword
 }
 
-func NewAuthHandler(managerService services.ManagerService) *AuthHandler {
-	return &AuthHandler{managerService: managerService}
+func NewAuthHandler(
+	managerService services.ManagerService,
+	getJWT utils.GetJWT,
+	pwdComparator utils.ComparePassword,
+) *AuthHandler {
+	return &AuthHandler{managerService: managerService, getJWT: getJWT, pwdComparator: pwdComparator}
 }
 
 func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +67,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager_id, credential.Email)
+		token, err := h.getJWT(cfg.JWT.Secret, manager_id, credential.Email)
 		if err != nil {
 			log.Println("Failed to generate JWT:", err)
 			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
@@ -77,7 +81,11 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(response)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Printf("Failed to send response to %s: %v", credential.Email, err)
+			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
 	case utils.Login:
 		manager, sqlErr := h.managerService.GetByEmail(credential.Email)
@@ -86,13 +94,13 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		error := bcrypt.CompareHashAndPassword([]byte(manager.Password), []byte(credential.Password))
+		error := h.pwdComparator([]byte(manager.Password), []byte(credential.Password))
 		if error != nil {
 			utils.SendErrorResponse(w, "Invalid credential", http.StatusUnauthorized)
 			return
 		}
 
-		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager.ID, manager.Email)
+		token, err := h.getJWT(cfg.JWT.Secret, manager.ID, manager.Email)
 		if err != nil {
 			log.Printf("Failed to generate JWT for user %d: %v", manager.ID, err)
 			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
@@ -106,7 +114,11 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Printf("Failed to send response to %d: %v", manager.ID, err)
+			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
 	default:
 		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)

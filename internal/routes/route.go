@@ -12,6 +12,7 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
@@ -29,7 +30,7 @@ func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 }
 
 func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {
-	handler := handlers.NewAuthHandler(manager_service)
-	mux.Handle("/auth", middleware.ConfigMiddleware(cfg, http.HandlerFunc(handler.Auth)))
-	mux.Handle("/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(http.HandlerFunc(handlers.ExampleSecureHander))))
+	handler := handlers.NewAuthHandler(manager_service, utils.GenerateJWT, bcrypt.CompareHashAndPassword)
+	mux.Handle("/v1/auth", middleware.ConfigMiddleware(cfg, http.HandlerFunc(handler.Auth)))
+	mux.Handle("/v1/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(http.HandlerFunc(handlers.ExampleSecureHander))))
 }

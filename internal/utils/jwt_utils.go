@@ -6,6 +6,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type GetJWT func(secret string, id int, email string) (string, error)
+
+type JWTGenerator interface {
+	GenerateJWT(secret string, id int, email string) (string, error)
+}
+
 type Claims struct {
 	ID    int    `json:"id"`
 	Email string `json:"email"`

@@ -17,6 +17,53 @@ func (_m *Encryption) EXPECT() *Encryption_Expecter {
 	return &Encryption_Expecter{mock: &_m.Mock}
 }
 
+// CompareHashAndPassword provides a mock function with given fields: hashedPassword, password
+func (_m *Encryption) CompareHashAndPassword(hashedPassword []byte, password []byte) error {
+	ret := _m.Called(hashedPassword, password)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CompareHashAndPassword")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]byte, []byte) error); ok {
+		r0 = rf(hashedPassword, password)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Encryption_CompareHashAndPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CompareHashAndPassword'
+type Encryption_CompareHashAndPassword_Call struct {
+	*mock.Call
+}
+
+// CompareHashAndPassword is a helper method to define mock.On call
+//   - hashedPassword []byte
+//   - password []byte
+func (_e *Encryption_Expecter) CompareHashAndPassword(hashedPassword interface{}, password interface{}) *Encryption_CompareHashAndPassword_Call {
+	return &Encryption_CompareHashAndPassword_Call{Call: _e.mock.On("CompareHashAndPassword", hashedPassword, password)}
+}
+
+func (_c *Encryption_CompareHashAndPassword_Call) Run(run func(hashedPassword []byte, password []byte)) *Encryption_CompareHashAndPassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].([]byte), args[1].([]byte))
+	})
+	return _c
+}
+
+func (_c *Encryption_CompareHashAndPassword_Call) Return(_a0 error) *Encryption_CompareHashAndPassword_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Encryption_CompareHashAndPassword_Call) RunAndReturn(run func([]byte, []byte) error) *Encryption_CompareHashAndPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GenerateFromPassword provides a mock function with given fields: password, cost
 func (_m *Encryption) GenerateFromPassword(password []byte, cost int) ([]byte, error) {
 	ret := _m.Called(password, cost)

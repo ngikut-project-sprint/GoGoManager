@@ -16,11 +16,17 @@ packages:
       dir: mocks/repository
     interfaces:
       ManagerRepository:
+  github.com/ngikut-project-sprint/GoGoManager/internal/services:
+    config:
+      dir: mocks/services
+    interfaces:
+      ManagerService:
   github.com/ngikut-project-sprint/GoGoManager/internal/utils:
     config:
       dir: mocks/utils
     interfaces:
       Encryption:
+      JWTGenerator:
   github.com/ngikut-project-sprint/GoGoManager/internal/validators:
     config:
       dir: mocks/validators
