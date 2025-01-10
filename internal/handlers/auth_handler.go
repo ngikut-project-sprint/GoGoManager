@@ -5,12 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
@@ -104,7 +103,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager.ID, manager.Email)
+		token, err := utils.GenerateJWT(cfg.JWT.Secret, manager.ID, *manager.Email)
 		if err != nil {
 			log.Printf("Failed to generate JWT for user %d: %v", manager.ID, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -112,7 +111,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := utils.AuthResponse{
-			Email: manager.Email,
+			Email: *manager.Email,
 			Token: token,
 		}
 
