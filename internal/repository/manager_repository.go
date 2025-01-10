@@ -1,7 +1,6 @@
-package repositories
+package repository
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/database"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
@@ -19,28 +19,35 @@ type ManagerRepository interface {
 	GetAll() ([]models.Manager, *utils.GoGoError)
 	GetByID(id int) (*models.Manager, *utils.GoGoError)
 	GetByEmail(email string) (*models.Manager, *utils.GoGoError)
-	Update(manager *models.Manager) *utils.GoGoError
+	Update(manager *utils.ManagerRequest) *utils.GoGoError
 }
 
 type managerRepository struct {
-	db *sql.DB
+	db           database.DB
+	hashPassword utils.HashPassword
 }
 
-func NewManagerRepository(db *sql.DB) ManagerRepository {
-	return &managerRepository{db: db}
+func NewManagerRepository(db database.DB, hashPassword utils.HashPassword) ManagerRepository {
+	return &managerRepository{db: db, hashPassword: hashPassword}
 }
 
 func (r *managerRepository) Create(email string, password string) (int, *utils.GoGoError) {
 	// Hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := r.hashPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return 0, utils.WrapError(err, utils.PasswordHashFailed, "Failed to hash password")
 	}
 
 	// Insert new manager
-	query := "INSERT INTO managers (email, password) VALUES ($1, $2) RETURNING id"
+	query := `
+  INSERT INTO managers (email, password)
+  VALUES ($1, $2)
+  RETURNING id`
+
+	row := r.db.QueryRow(query, email, string(hashedPassword))
+
 	var id int
-	error := r.db.QueryRow(query, email, hashedPassword).Scan(&id)
+	error := row.Scan(&id)
 	if error != nil {
 		if uniqueErr := utils.UniqueConstraintError(error); uniqueErr != nil {
 			return 0, utils.WrapError(error, utils.SQLUniqueViolated, "Email already registered")
@@ -55,7 +62,10 @@ func (r *managerRepository) Create(email string, password string) (int, *utils.G
 func (r *managerRepository) GetAll() ([]models.Manager, *utils.GoGoError) {
 	var managers []models.Manager
 
-	query := "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers"
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
+
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.SQLError, "Error querying managers")
@@ -81,7 +91,11 @@ func (r *managerRepository) GetAll() ([]models.Manager, *utils.GoGoError) {
 func (r *managerRepository) GetByID(id int) (*models.Manager, *utils.GoGoError) {
 	var manager models.Manager
 
-	query := "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE id = $1"
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE id = $1`
+
 	err := r.db.QueryRow(query, id).Scan(&manager.ID, &manager.Email, &manager.Password, &manager.Name, &manager.UserImageUri, &manager.CompanyName, &manager.CompanyImageUri, &manager.CreatedAt, &manager.UpdatedAt, &manager.DeletedAt)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.SQLError, "Error querying manager by id")
@@ -93,7 +107,11 @@ func (r *managerRepository) GetByID(id int) (*models.Manager, *utils.GoGoError) 
 func (r *managerRepository) GetByEmail(email string) (*models.Manager, *utils.GoGoError) {
 	var manager models.Manager
 
-	query := "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE email = $1"
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE email = $1`
+
 	err := r.db.QueryRow(query, email).Scan(&manager.ID, &manager.Email, &manager.Password, &manager.Name, &manager.UserImageUri, &manager.CompanyName, &manager.CompanyImageUri, &manager.CreatedAt, &manager.UpdatedAt, &manager.DeletedAt)
 	if err != nil {
 		log.Println(err)
@@ -103,7 +121,7 @@ func (r *managerRepository) GetByEmail(email string) (*models.Manager, *utils.Go
 	return &manager, nil
 }
 
-func (r *managerRepository) Update(manager *models.Manager) *utils.GoGoError {
+func (r *managerRepository) Update(manager *utils.ManagerRequest) *utils.GoGoError {
 	query := "UPDATE managers SET "
 	var params []interface{}
 	var setClauses []string

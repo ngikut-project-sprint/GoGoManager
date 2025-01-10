@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
-	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
@@ -53,13 +52,14 @@ func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	var input models.Manager
+	var input utils.ManagerRequest
 	if r.Method != http.MethodPatch {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
+	log.Println("update manager")
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		log.Println("Failed to decode request body:", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -70,20 +70,27 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	manager, err := h.managerService.GetByID(claims.ID)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-
 	//assign manager id
-	input.ID = manager.ID
+	input.ID = claims.ID
 
 	//update manager
 	updateErr := h.managerService.Update(&input)
 	if updateErr != nil {
-		http.Error(w, "Failed to update manager: "+err.Error(), http.StatusInternalServerError)
-		return
+		switch updateErr.Type {
+		case utils.SQLUniqueViolated:
+			utils.SendErrorResponse(w, "Email already registered", http.StatusConflict)
+			return
+		case utils.InvalidEmailFormat:
+			utils.SendErrorResponse(w, "Invalid email format", http.StatusBadRequest)
+			return
+		case utils.InvalidPasswordLength:
+			utils.SendErrorResponse(w, "Invalid password length (min length: 8, max length: 32)", http.StatusBadRequest)
+			return
+		default:
+			log.Println("Failed to create manager:", updateErr)
+			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	//get updated manager

@@ -1,0 +1,47 @@
+name: Lint Code
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  GO_VERSION: "1.23.4"
+
+jobs:
+  golangcli-lint:
+    name: Lint Go Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://github.com/golangci/golangci-lint/releases/download/v1.63.4/golangci-lint-1.63.4-linux-amd64.tar.gz | tar -xzv -C /home/runner/go/bin
+          mv /home/runner/go/bin/golangci-lint-1.63.4-linux-amd64/golangci-lint /home/runner/go/bin/ # Move the binary to /home/runner/go/bin
+          chmod +x /home/runner/go/bin/golangci-lint  # Ensure the binary is executable
+          echo "export PATH=$PATH:/home/runner/go/bin" >> $GITHUB_ENV  # Persist the updated PATH to the environment
+
+      - name: Verify golangci-lint installation
+        run: |
+          echo "PATH: $PATH"  # Confirm the current PATH
+          ls -la /home/runner/go/bin  # List files in the directory to confirm golangci-lint exists
+          golangci-lint --version  # Verify golangci-lint version
+
+      - name: Run golangcli-lint
+        run: |
+          golangci-lint run ./...
+
+      - name: Upload lint report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: golangcli-lint-report
+          path: ./golangcli-lint-report.txt
