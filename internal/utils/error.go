@@ -13,6 +13,7 @@ const (
 	InvalidURIFormat
 	InvalidPasswordLength
 	InvalidUserId
+	InvalidNameLength
 	SQLError
 	SQLUniqueViolated
 	PasswordHashFailed
