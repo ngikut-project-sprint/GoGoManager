@@ -31,8 +31,9 @@ jobs:
 
       - name: Verify golangci-lint installation
         run: |
-          echo $PATH  # Verify the PATH to check if golangci-lint is included
-          golangci-lint --version  # Confirm that golangci-lint is installed
+          echo "PATH: $PATH"  # Confirm the current PATH
+          ls -la /home/runner/go/bin  # List files in the directory to confirm golangci-lint exists
+          golangci-lint --version  # Verify golangci-lint version
 
       - name: Run golangcli-lint
         run: |
