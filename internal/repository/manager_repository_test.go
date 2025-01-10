@@ -26,6 +26,10 @@ func TestManagerRepository_Create_Success(t *testing.T) {
 	email := "test@email.com"
 	password := "securepassword123"
 	hashedPassword := []byte("$2a$10$hashedpasswordexample")
+	query := `
+  INSERT INTO managers (email, password)
+  VALUES ($1, $2)
+  RETURNING id`
 
 	mockEncrypt.On("GenerateFromPassword", []byte(password), bcrypt.DefaultCost).Return(hashedPassword, nil)
 
@@ -35,7 +39,7 @@ func TestManagerRepository_Create_Success(t *testing.T) {
 
 	mockDB.On(
 		"QueryRow",
-		"INSERT INTO managers (email, password) VALUES ($1, $2) RETURNING id",
+		query,
 		email,
 		string(hashedPassword),
 	).Return(mockRow)
@@ -82,6 +86,10 @@ func TestManagerRepository_Create_EmailAlreadyRegistered(t *testing.T) {
 	email := "test@email.com"
 	password := "securepassword123"
 	hashedPassword := []byte("$2a$10$hashedpasswordexample")
+	query := `
+  INSERT INTO managers (email, password)
+  VALUES ($1, $2)
+  RETURNING id`
 
 	mockEncrypt.On("GenerateFromPassword", []byte(password), bcrypt.DefaultCost).Return(hashedPassword, nil)
 
@@ -89,7 +97,7 @@ func TestManagerRepository_Create_EmailAlreadyRegistered(t *testing.T) {
 
 	mockDB.On(
 		"QueryRow",
-		"INSERT INTO managers (email, password) VALUES ($1, $2) RETURNING id",
+		query,
 		email,
 		string(hashedPassword),
 	).Return(mockRow)
@@ -114,6 +122,10 @@ func TestManagerRepository_Create_DatabaseError(t *testing.T) {
 	email := "test@email.com"
 	password := "securepassword123"
 	hashedPassword := []byte("$2a$10$hashedpasswordexample")
+	query := `
+  INSERT INTO managers (email, password)
+  VALUES ($1, $2)
+  RETURNING id`
 
 	mockEncrypt.On("GenerateFromPassword", []byte(password), bcrypt.DefaultCost).Return(hashedPassword, nil)
 
@@ -121,7 +133,7 @@ func TestManagerRepository_Create_DatabaseError(t *testing.T) {
 
 	mockDB.On(
 		"QueryRow",
-		"INSERT INTO managers (email, password) VALUES ($1, $2) RETURNING id",
+		query,
 		email,
 		string(hashedPassword),
 	).Return(mockRow)
@@ -209,8 +221,11 @@ func TestManagerRepository_GetAll_Success(t *testing.T) {
 	mockRows.On("Err").Return(nil)
 	mockRows.On("Close").Return(nil)
 
-	mockDB.On("Query", "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers").
-		Return(mockRows, nil)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
+
+	mockDB.On("Query", query).Return(mockRows, nil)
 
 	managers, err := repo.GetAll()
 
@@ -246,8 +261,11 @@ func TestManagerRepository_GetAll_ScanError(t *testing.T) {
 
 	mockRows.On("Close").Return(nil)
 
-	mockDB.On("Query", "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers").
-		Return(mockRows, nil)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
+
+	mockDB.On("Query", query).Return(mockRows, nil)
 
 	managers, err := repo.GetAll()
 
@@ -271,8 +289,11 @@ func TestManagerRepository_GetAll_RowsError(t *testing.T) {
 	mockRows.On("Err").Return(errors.New("Error scanning row"))
 	mockRows.On("Close").Return(nil)
 
-	mockDB.On("Query", "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers").
-		Return(mockRows, nil)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
+
+	mockDB.On("Query", query).Return(mockRows, nil)
 
 	managers, err := repo.GetAll()
 
@@ -292,8 +313,11 @@ func TestManagerRepository_GetAll_DatabaseError(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
-	mockDB.On("Query", "SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers").
-		Return(nil, errors.New("Failed to execute query"))
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
+
+	mockDB.On("Query", query).Return(nil, errors.New("Failed to execute query"))
 
 	managers, err := repo.GetAll()
 
@@ -350,11 +374,12 @@ func TestManagerRepository_GetByID_Success(t *testing.T) {
 		*(args[9].(**time.Time)) = manager.DeletedAt
 	}).Return(nil)
 
-	mockDB.On(
-		"QueryRow",
-		"SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE id = $1",
-		manager.ID,
-	).Return(mockRow)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE id = $1`
+
+	mockDB.On("QueryRow", query, manager.ID).Return(mockRow)
 
 	actualManager, err := repo.GetByID(manager.ID)
 
@@ -389,11 +414,12 @@ func TestManagerRepository_GetByID_DatabaseError(t *testing.T) {
 		mock.AnythingOfType("**time.Time"),
 	).Return(errors.New("Error scannin row"))
 
-	mockDB.On(
-		"QueryRow",
-		"SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE id = $1",
-		id,
-	).Return(mockRow)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE id = $1`
+
+	mockDB.On("QueryRow", query, id).Return(mockRow)
 
 	actualManager, err := repo.GetByID(id)
 
@@ -450,11 +476,12 @@ func TestManagerRepository_GetByEmail_Success(t *testing.T) {
 		*(args[9].(**time.Time)) = manager.DeletedAt
 	}).Return(nil)
 
-	mockDB.On(
-		"QueryRow",
-		"SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE email = $1",
-		manager.Email,
-	).Return(mockRow)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE email = $1`
+
+	mockDB.On("QueryRow", query, manager.Email).Return(mockRow)
 
 	actualManager, err := repo.GetByEmail(manager.Email)
 
@@ -489,11 +516,12 @@ func TestManagerRepository_GetByEmail_DatabaseError(t *testing.T) {
 		mock.AnythingOfType("**time.Time"),
 	).Return(errors.New("Error scanning row"))
 
-	mockDB.On(
-		"QueryRow",
-		"SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at FROM managers WHERE email = $1",
-		email,
-	).Return(mockRow)
+	query := `
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE email = $1`
+
+	mockDB.On("QueryRow", query, email).Return(mockRow)
 
 	actualManager, err := repo.GetByEmail(email)
 
@@ -524,8 +552,10 @@ func TestManagerRepository_Update_Success(t *testing.T) {
 		DeletedAt:       nil,
 	}
 
+	query := `UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`
+
 	mockDB.On("Exec",
-		"UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6",
+		query,
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("*string"),
@@ -562,7 +592,7 @@ func TestManagerRepository_Update_NoField(t *testing.T) {
 	}
 
 	mockDB.On("Exec",
-		"UPDATE managers SET email = $1, updated_at = $2 WHERE id = $3",
+		`UPDATE managers SET email = $1, updated_at = $2 WHERE id = $3`,
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
@@ -596,7 +626,7 @@ func TestManagerRepository_Update_ExecError(t *testing.T) {
 	}
 
 	mockDB.On("Exec",
-		"UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6",
+		`UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`,
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("*string"),
@@ -633,7 +663,7 @@ func TestManagerRepository_Update_PartialUpdate(t *testing.T) {
 	}
 
 	mockDB.On("Exec",
-		"UPDATE managers SET email = $1, name = $2, updated_at = $3 WHERE id = $4",
+		`UPDATE managers SET email = $1, name = $2, updated_at = $3 WHERE id = $4`,
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("*string"),
 		mock.AnythingOfType("time.Time"),

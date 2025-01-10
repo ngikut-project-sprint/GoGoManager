@@ -39,9 +39,9 @@ func (r *managerRepository) Create(email string, password string) (int, *utils.G
 
 	// Insert new manager
 	query := `
-      INSERT INTO managers (email, password) 
-      VALUES ($1, $2) 
-      RETURNING id`
+  INSERT INTO managers (email, password)
+  VALUES ($1, $2)
+  RETURNING id`
 
 	row := r.db.QueryRow(query, email, string(hashedPassword))
 
@@ -62,8 +62,8 @@ func (r *managerRepository) GetAll() ([]models.Manager, *utils.GoGoError) {
 	var managers []models.Manager
 
 	query := `
-      SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
-      FROM managers`
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at
+  FROM managers`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -91,9 +91,9 @@ func (r *managerRepository) GetByID(id int) (*models.Manager, *utils.GoGoError) 
 	var manager models.Manager
 
 	query := `
-      SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
-      FROM managers 
-      WHERE id = $1`
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE id = $1`
 
 	err := r.db.QueryRow(query, id).Scan(&manager.ID, &manager.Email, &manager.Password, &manager.Name, &manager.UserImageUri, &manager.CompanyName, &manager.CompanyImageUri, &manager.CreatedAt, &manager.UpdatedAt, &manager.DeletedAt)
 	if err != nil {
@@ -107,9 +107,9 @@ func (r *managerRepository) GetByEmail(email string) (*models.Manager, *utils.Go
 	var manager models.Manager
 
 	query := `
-      SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
-      FROM managers 
-      WHERE email = $1`
+  SELECT id, email, password, name, user_image_uri, company_name, company_image_uri, created_at, updated_at, deleted_at 
+  FROM managers 
+  WHERE email = $1`
 
 	err := r.db.QueryRow(query, email).Scan(&manager.ID, &manager.Email, &manager.Password, &manager.Name, &manager.UserImageUri, &manager.CompanyName, &manager.CompanyImageUri, &manager.CreatedAt, &manager.UpdatedAt, &manager.DeletedAt)
 	if err != nil {
