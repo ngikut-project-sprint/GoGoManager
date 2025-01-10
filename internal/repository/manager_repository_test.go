@@ -539,6 +539,7 @@ func TestManagerRepository_Update_Success(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
+	hashedPassword := []byte("$2a$10$hashedpasswordexample")
 	manager := &utils.ManagerRequest{
 		ID:              1,
 		Email:           ptr("test1@example.com"),
@@ -551,10 +552,12 @@ func TestManagerRepository_Update_Success(t *testing.T) {
 
 	query := `UPDATE managers SET email = $1, password = $2, name = $3, user_image_uri = $4, company_name = $5, company_image_uri = $6, updated_at = $7 WHERE id = $8`
 
+	mockEncrypt.On("GenerateFromPassword", []byte(*manager.Password), bcrypt.DefaultCost).Return(hashedPassword, nil)
+
 	mockDB.On("Exec",
 		query,
 		mock.AnythingOfType("string"),
-		mock.AnythingOfType("string"),
+		mock.AnythingOfType("[]uint8"),
 		mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"),
@@ -580,7 +583,7 @@ func TestManagerRepository_Update_NoField(t *testing.T) {
 	manager := &utils.ManagerRequest{
 		ID:              1,
 		Email:           ptr("old_email@example.com"),
-		Password:        ptr(""),
+		Password:        nil,
 		Name:            nil,
 		UserImageUri:    nil,
 		CompanyName:     nil,
@@ -608,18 +611,25 @@ func TestManagerRepository_Update_ExecError(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
+	hashedPassword := []byte("$2a$10$hashedpasswordexample")
 	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           ptr("new_email@example.com"),
-		Password:        ptr("new_password"),
-		Name:            ptr("New Name"),
-		UserImageUri:    ptr("new_image_uri"),
-		CompanyName:     ptr("New Company"),
-		CompanyImageUri: ptr("new_company_image"),
+		Email:           ptr("test1@example.com"),
+		Password:        ptr("hashedpassword1"),
+		Name:            ptr("Manager One"),
+		UserImageUri:    ptr("http://aws-s3.com/image1.png"),
+		CompanyName:     ptr("Company A"),
+		CompanyImageUri: ptr("http://aws-s3.com/company1.png"),
 	}
 
+	query := `UPDATE managers SET email = $1, password = $2, name = $3, user_image_uri = $4, company_name = $5, company_image_uri = $6, updated_at = $7 WHERE id = $8`
+
+	mockEncrypt.On("GenerateFromPassword", []byte(*manager.Password), bcrypt.DefaultCost).Return(hashedPassword, nil)
+
 	mockDB.On("Exec",
-		`UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`,
+		query,
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("[]uint8"),
 		mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"),
 		mock.AnythingOfType("string"),
@@ -645,7 +655,7 @@ func TestManagerRepository_Update_PartialUpdate(t *testing.T) {
 	manager := &utils.ManagerRequest{
 		ID:              1,
 		Email:           ptr("new_email@example.com"),
-		Password:        ptr(""),
+		Password:        nil,
 		Name:            ptr("New Name"),
 		UserImageUri:    nil,
 		CompanyName:     nil,
