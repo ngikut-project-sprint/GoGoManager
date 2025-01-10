@@ -25,7 +25,13 @@ jobs:
       - name: Install golangci-lint
         run: |
           curl -sSfL https://github.com/golangci/golangci-lint/releases/download/v1.63.4/golangci-lint-1.63.4-linux-amd64.tar.gz | tar -xzv -C /home/runner/go/bin
+          export PATH=$PATH:/home/runner/go/bin  # Ensure golangci-lint is in the PATH
           echo "/home/runner/go/bin" >> $GITHUB_PATH  # Ensure golangci-lint is in the PATH
+
+      - name: Verify golangci-lint installation
+        run: |
+          echo $PATH  # Verify the PATH to check if golangci-lint is included
+          golangci-lint --version  # Confirm that golangci-lint is installed
 
       - name: Run golangcli-lint
         run: |
