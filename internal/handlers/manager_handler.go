@@ -57,9 +57,10 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	log.Println("update manager")
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		log.Println("Failed to decode request body:", err)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&input); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -85,6 +86,9 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 			return
 		case utils.InvalidPasswordLength:
 			utils.SendErrorResponse(w, "Invalid password length (min length: 8, max length: 32)", http.StatusBadRequest)
+			return
+		case utils.InvalidNameLength:
+			utils.SendErrorResponse(w, "Invalid name length (min length: 4, max length: 52)", http.StatusBadRequest)
 			return
 		default:
 			log.Println("Failed to create manager:", updateErr)

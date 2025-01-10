@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -127,37 +128,65 @@ func (r *managerRepository) Update(manager *utils.ManagerRequest) *utils.GoGoErr
 	var setClauses []string
 	paramCounter := 1
 
-	if manager.Email != nil && manager.ValidEmail() {
+	if manager.Email != nil {
+		if !manager.ValidEmail() {
+			err := errors.New("invalid email format")
+			return utils.WrapError(err, utils.InvalidEmailFormat, "Invalid email")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("email = $%d", paramCounter))
 		params = append(params, *manager.Email)
 		paramCounter++
 	}
 
-	if manager.Password != nil && manager.ValidPassword() {
+	if manager.Password != nil {
+		if !manager.ValidPassword() {
+			err := errors.New("invalid password format")
+			return utils.WrapError(err, utils.InvalidPasswordLength, "Invalid password")
+		}
+		hashedPassword, err := r.hashPassword([]byte(*manager.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return utils.WrapError(err, utils.SQLError, "Error hashing password")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("password = $%d", paramCounter))
-		params = append(params, *manager.Password)
+		params = append(params, hashedPassword)
 		paramCounter++
 	}
 
-	if manager.Name != nil && manager.ValidName() {
+	if manager.Name != nil {
+		if !manager.ValidName() {
+			err := errors.New("invalid name length")
+			return utils.WrapError(err, utils.InvalidNameLength, "Invalid name")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("name = $%d", paramCounter))
 		params = append(params, *manager.Name)
 		paramCounter++
 	}
 
-	if manager.UserImageUri != nil && manager.ValidImageURI() {
+	if manager.UserImageUri != nil {
+		if !manager.ValidImageURI() {
+			err := errors.New("invalid user image uri format")
+			return utils.WrapError(err, utils.InvalidURIFormat, "Invalid user image uri")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("user_image_uri = $%d", paramCounter))
 		params = append(params, *manager.UserImageUri)
 		paramCounter++
 	}
 
-	if manager.CompanyName != nil && manager.ValidCompanyName() {
+	if manager.CompanyName != nil {
+		if !manager.ValidCompanyName() {
+			err := errors.New("invalid company name length")
+			return utils.WrapError(err, utils.InvalidNameLength, "Invalid company name")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("company_name = $%d", paramCounter))
 		params = append(params, *manager.CompanyName)
 		paramCounter++
 	}
 
-	if manager.CompanyImageUri != nil && manager.ValidCompanyImageURI() {
+	if manager.CompanyImageUri != nil {
+		if !manager.ValidCompanyImageURI() {
+			err := errors.New("invalid company image uri format")
+			return utils.WrapError(err, utils.InvalidURIFormat, "Invalid company image uri")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("company_image_uri = $%d", paramCounter))
 		params = append(params, *manager.CompanyImageUri)
 		paramCounter++
