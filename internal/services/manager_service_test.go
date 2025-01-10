@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 	mocksRepo "github.com/ngikut-project-sprint/GoGoManager/mocks/repository"
 	mocksValidators "github.com/ngikut-project-sprint/GoGoManager/mocks/validators"
@@ -17,7 +18,7 @@ func TestManagerService_CreateManagers_Success(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	id := 1
 	email := "test@email.com"
@@ -41,7 +42,7 @@ func TestManagerService_CreateManagers_InvalidEmail(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	email := "test@email.c"
 	password := "securepassword123"
@@ -68,7 +69,7 @@ func TestManagerService_CreateManagers_InvalidPassword(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	email := "test@email.c"
 	password := "securepassword123"
@@ -96,7 +97,7 @@ func TestManagerService_GetAllManagers_Success(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	mockManagers := []models.Manager{
 		{
@@ -141,7 +142,7 @@ func TestManagerService_GetAllManagers_Error(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	error := &utils.GoGoError{Err: errors.New("Database error")}
 
@@ -159,7 +160,7 @@ func TestManagerService_GetByIDManager_Success(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	id := 1
 
@@ -192,7 +193,7 @@ func TestManagerService_GetByIDManager_InvalidID(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	id := 0
 	e := errors.New("Invalid sql id")
@@ -216,7 +217,7 @@ func TestManagerService_GetByIDManager_Error(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	id := 1
 	error := &utils.GoGoError{Err: errors.New("Database error")}
@@ -237,7 +238,7 @@ func TestManagerService_GetByEmailManager_Success(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	email := "test1@example.com"
 
@@ -271,7 +272,7 @@ func TestManagerService_GetByEmailManager_InvalidEmail(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	email := "test1@example.com"
 	e := errors.New("Invalid email format")
@@ -297,7 +298,7 @@ func TestManagerService_GetByEmailManager_Error(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	email := "test1@example.com"
 	error := &utils.GoGoError{Err: errors.New("Database error")}
@@ -319,7 +320,7 @@ func TestManagerService_UpdateManager_Success(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	manager := &models.Manager{
 		ID:              1,
@@ -349,7 +350,7 @@ func TestManagerService_UpdateManager_Error(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
+	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
 	error := &utils.GoGoError{Err: errors.New("Database error")}
 

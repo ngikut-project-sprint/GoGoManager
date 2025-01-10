@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"errors"
@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/handlers"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
@@ -35,7 +36,7 @@ func TestAuthHandler_RegisterManager_Success(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	manager_id := 1
 	email := "random@name.com"
@@ -73,7 +74,7 @@ func TestAuthHandler_RegisterManager_WrongMethod(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "random@name.com", "password": "cobalagi", "action": "create"}`,
@@ -103,7 +104,7 @@ func TestAuthHandler_RegisterManager_CorruptRequestBody(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "rando`,
@@ -133,7 +134,7 @@ func TestAuthHandler_RegisterManager_ConfigNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "random@name.com", "password": "cobalagi", "action": "create"}`,
@@ -156,7 +157,7 @@ func TestAuthHandler_RegisterManager_EmailAlreadyRegistered(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 	password := "cobalagi"
@@ -198,7 +199,7 @@ func TestAuthHandler_RegisterManager_InvalidEmailFormat(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 	password := "cobalagi"
@@ -240,7 +241,7 @@ func TestAuthHandler_RegisterManager_InvalidPasswordLeght(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 	password := "cobalagi"
@@ -282,7 +283,7 @@ func TestAuthHandler_RegisterManager_DatabaseError(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 	password := "cobalagi"
@@ -324,7 +325,7 @@ func TestAuthHandler_RegisterManager_JWTGenerateError(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	manager_id := 1
 	email := "random@name.com"
@@ -361,7 +362,7 @@ func TestAuthHandler_LoginManager_Success(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	manager_id := 1
 	email := "random@name.com"
@@ -413,7 +414,7 @@ func TestAuthHandler_LoginManager_WrongMethod(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "random@name.com", "password": "cobalagi", "action": "login"}`,
@@ -443,7 +444,7 @@ func TestAuthHandler_LoginManager_CorruptRequestBody(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "rando`,
@@ -473,7 +474,7 @@ func TestAuthHandler_LoginManager_ConfigNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	mockBody := &MockRequestBody{
 		Data:  `{"email": "random@name.com", "password": "cobalagi", "action": "login"}`,
@@ -496,7 +497,7 @@ func TestAuthHandler_LoginManager_UserNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 
@@ -537,7 +538,7 @@ func TestAuthHandler_LoginManager_Unauthorized(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	email := "random@name.com"
 	password := "cobalagi"
@@ -588,7 +589,7 @@ func TestAuthHandler_LoginManager_FailedGenerateJWT(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
 	mockJWTGen := &mocksUtils.JWTGenerator{}
 	mockBCrypt := &mocksUtils.Encryption{}
-	handler := NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
+	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
 	manager_id := 1
 	email := "random@name.com"
