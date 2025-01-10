@@ -549,14 +549,16 @@ func TestManagerRepository_Update_Success(t *testing.T) {
 		CompanyImageUri: ptr("http://aws-s3.com/company1.png"),
 	}
 
-	query := `UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`
+	query := `UPDATE managers SET email = $1, password = $2, name = $3, user_image_uri = $4, company_name = $5, company_image_uri = $6, updated_at = $7 WHERE id = $8`
 
 	mockDB.On("Exec",
 		query,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, nil)
@@ -587,7 +589,7 @@ func TestManagerRepository_Update_NoField(t *testing.T) {
 
 	mockDB.On("Exec",
 		`UPDATE managers SET email = $1, updated_at = $2 WHERE id = $3`,
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, nil)
@@ -618,10 +620,10 @@ func TestManagerRepository_Update_ExecError(t *testing.T) {
 
 	mockDB.On("Exec",
 		`UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, errors.New("Database error"))
@@ -652,8 +654,8 @@ func TestManagerRepository_Update_PartialUpdate(t *testing.T) {
 
 	mockDB.On("Exec",
 		`UPDATE managers SET email = $1, name = $2, updated_at = $3 WHERE id = $4`,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, errors.New("Database error"))
