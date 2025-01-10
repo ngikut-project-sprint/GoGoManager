@@ -34,7 +34,7 @@ func (m *MockRequestBody) Close() error {
 
 func TestAuthHandler_RegisterManager_Success(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -72,7 +72,7 @@ func TestAuthHandler_RegisterManager_Success(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_WrongMethod(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -102,7 +102,7 @@ func TestAuthHandler_RegisterManager_WrongMethod(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_CorruptRequestBody(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -132,7 +132,7 @@ func TestAuthHandler_RegisterManager_CorruptRequestBody(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_ConfigNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -155,7 +155,7 @@ func TestAuthHandler_RegisterManager_ConfigNotFound(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_EmailAlreadyRegistered(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -197,7 +197,7 @@ func TestAuthHandler_RegisterManager_EmailAlreadyRegistered(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_InvalidEmailFormat(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -239,7 +239,7 @@ func TestAuthHandler_RegisterManager_InvalidEmailFormat(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_InvalidPasswordLeght(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -281,7 +281,7 @@ func TestAuthHandler_RegisterManager_InvalidPasswordLeght(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_DatabaseError(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -323,7 +323,7 @@ func TestAuthHandler_RegisterManager_DatabaseError(t *testing.T) {
 
 func TestAuthHandler_RegisterManager_JWTGenerateError(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -360,7 +360,7 @@ func TestAuthHandler_RegisterManager_JWTGenerateError(t *testing.T) {
 
 func TestAuthHandler_LoginManager_Success(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -412,7 +412,7 @@ func TestAuthHandler_LoginManager_Success(t *testing.T) {
 
 func TestAuthHandler_LoginManager_WrongMethod(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -442,7 +442,7 @@ func TestAuthHandler_LoginManager_WrongMethod(t *testing.T) {
 
 func TestAuthHandler_LoginManager_CorruptRequestBody(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -472,7 +472,7 @@ func TestAuthHandler_LoginManager_CorruptRequestBody(t *testing.T) {
 
 func TestAuthHandler_LoginManager_ConfigNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -495,7 +495,7 @@ func TestAuthHandler_LoginManager_ConfigNotFound(t *testing.T) {
 
 func TestAuthHandler_LoginManager_UserNotFound(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -536,7 +536,7 @@ func TestAuthHandler_LoginManager_UserNotFound(t *testing.T) {
 
 func TestAuthHandler_LoginManager_Unauthorized(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 
@@ -587,7 +587,7 @@ func TestAuthHandler_LoginManager_Unauthorized(t *testing.T) {
 
 func TestAuthHandler_LoginManager_FailedGenerateJWT(t *testing.T) {
 	mockService := new(mocksServices.ManagerService)
-	mockJWTGen := &mocksUtils.JWTGenerator{}
+	mockJWTGen := &mocksUtils.JWTHandler{}
 	mockBCrypt := &mocksUtils.Encryption{}
 	handler := handlers.NewAuthHandler(mockService, mockJWTGen.GenerateJWT, mockBCrypt.CompareHashAndPassword)
 

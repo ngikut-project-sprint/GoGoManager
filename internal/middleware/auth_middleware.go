@@ -15,7 +15,7 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
 
-func AuthMiddleware(next http.Handler) http.Handler {
+func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get token from header
 		authHeader := r.Header.Get("Authorization")
@@ -40,7 +40,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Parse token to jwt
-		token, err := jwt.ParseWithClaims(tokenString, &utils.Claims{}, func(t *jwt.Token) (interface{}, error) {
+		token, err := parseJWT(tokenString, &utils.Claims{}, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 			}

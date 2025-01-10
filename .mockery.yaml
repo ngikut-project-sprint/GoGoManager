@@ -26,7 +26,7 @@ packages:
       dir: mocks/utils
     interfaces:
       Encryption:
-      JWTGenerator:
+      JWTHandler:
   github.com/ngikut-project-sprint/GoGoManager/internal/validators:
     config:
       dir: mocks/validators

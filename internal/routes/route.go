@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/config"
@@ -32,5 +33,5 @@ func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {
 	handler := handlers.NewAuthHandler(manager_service, utils.GenerateJWT, bcrypt.CompareHashAndPassword)
 	mux.Handle("/v1/auth", middleware.ConfigMiddleware(cfg, http.HandlerFunc(handler.Auth)))
-	mux.Handle("/v1/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(http.HandlerFunc(handlers.ExampleSecureHander))))
+	mux.Handle("/v1/protected", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handlers.ExampleSecureHander))))
 }

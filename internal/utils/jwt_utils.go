@@ -7,9 +7,11 @@ import (
 )
 
 type GetJWT func(secret string, id int, email string) (string, error)
+type ParseJWT func(tokenString string, claims jwt.Claims, keyFunc jwt.Keyfunc, options ...jwt.ParserOption) (*jwt.Token, error)
 
-type JWTGenerator interface {
+type JWTHandler interface {
 	GenerateJWT(secret string, id int, email string) (string, error)
+	ParseWithClaims(tokenString string, claims jwt.Claims, keyFunc jwt.Keyfunc, options ...jwt.ParserOption) (*jwt.Token, error)
 }
 
 type Claims struct {
