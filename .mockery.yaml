@@ -1,0 +1,35 @@
+with-expecter: true
+dir: mocks
+outpkg: mocks
+filename: "{{.InterfaceName}}.go"
+mockname: "{{.InterfaceName}}"
+packages:
+  github.com/ngikut-project-sprint/GoGoManager/internal/database:
+    config:
+      dir: mocks/database
+    interfaces:
+      Row:
+      Rows:
+      DB:
+  github.com/ngikut-project-sprint/GoGoManager/internal/repository:
+    config:
+      dir: mocks/repository
+    interfaces:
+      ManagerRepository:
+  github.com/ngikut-project-sprint/GoGoManager/internal/services:
+    config:
+      dir: mocks/services
+    interfaces:
+      ManagerService:
+  github.com/ngikut-project-sprint/GoGoManager/internal/utils:
+    config:
+      dir: mocks/utils
+    interfaces:
+      Encryption:
+      JWTHandler:
+  github.com/ngikut-project-sprint/GoGoManager/internal/validators:
+    config:
+      dir: mocks/validators
+    interfaces:
+      EmailValidator:
+      PasswordValidator:

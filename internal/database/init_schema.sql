@@ -5,6 +5,7 @@ CREATE TYPE GENDER AS ENUM ('male', 'female');
 CREATE TABLE managers (
   id SERIAL NOT NULL,
   email VARCHAR(255) NOT NULL,
+  password VARCHAR(60) NOT NULL,
   name VARCHAR(52),
   user_image_uri TEXT,
   company_name VARCHAR(52),
