@@ -44,9 +44,9 @@ func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(jsonResponse); err != nil {
+	if err := json.NewEncoder(w).Encode(jsonResponse); err != nil {
 		log.Println("Failed to write response:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -111,7 +111,11 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	if err := json.NewEncoder(w).Encode(jsonResponse); err != nil {
+		log.Println("Failed to write response:", err)
+		utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 func (h *ManagerHandler) Manager(w http.ResponseWriter, r *http.Request) {
 	http.HandlerFunc(
