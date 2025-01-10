@@ -25,6 +25,7 @@ jobs:
       - name: Install golangcli-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.63.4
+          echo "::add-path::$(go env GOPATH)/bin" # Ensure it's added to the PATH
           golangcli-lint version
 
       - name: Run golangcli-lint
