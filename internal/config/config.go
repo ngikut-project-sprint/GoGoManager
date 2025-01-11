@@ -26,7 +26,11 @@ type Config struct {
 func Get() (*Config, error) {
 	cfg := &Config{}
 
-	godotenv.Load(".env")
+	err := godotenv.Load(".env")
+	if err != nil {
+		return cfg, err
+	}
+
 	if err := cleanenv.ReadEnv(cfg); err != nil {
 		return cfg, err
 	}
