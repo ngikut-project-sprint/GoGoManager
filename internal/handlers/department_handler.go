@@ -4,29 +4,20 @@ import (
     "encoding/json"
     "net/http"
     "strconv"
-    "strings"
     "log"
 	"fmt"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
     "github.com/ngikut-project-sprint/GoGoManager/internal/services"
     "github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
 
-type DepartmentHandler struct {
-    service services.DepartmentService
+var req struct {
+    Name string `json:"name"`
 }
 
-func WriteJSONError(w http.ResponseWriter, status int, message string, code string, details string) {
-    errorResponse := utils.ErrorResponse{
-        Status:  status,
-        Message: message,
-        Code:    code,
-        Details: details,
-    }
-
-    w.Header().Set("Content-Type", "application/json; charset=utf-8")
-    w.WriteHeader(status)
-    json.NewEncoder(w).Encode(errorResponse)
+type DepartmentHandler struct {
+    service services.DepartmentService
 }
 
 func NewDepartmentHandler(service services.DepartmentService) *DepartmentHandler {
@@ -35,11 +26,6 @@ func NewDepartmentHandler(service services.DepartmentService) *DepartmentHandler
 
 func (h *DepartmentHandler) HandleDepartment(w http.ResponseWriter, r *http.Request) {
     log.Printf("HandleDepartment called with method: %s and path: %s\n", r.Method, r.URL.Path)
-    
-    if r.URL.Path != "/department" {
-        utils.NotFound(w, "Route not found")
-        return
-    }
 
     switch r.Method {
     case http.MethodGet:
@@ -52,19 +38,16 @@ func (h *DepartmentHandler) HandleDepartment(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *DepartmentHandler) HandleDepartmentWithID(w http.ResponseWriter, r *http.Request) {
-    path := strings.TrimPrefix(r.URL.Path, "/department/")
-    if path == "" {
+    idStr := r.URL.Query().Get("id")
+    if idStr == "" {
         utils.BadRequest(w, "Department ID is required")
-        return
-    }
-    departmentIDStr := strings.Split(path, "/")[0]
-
-    // Convert string ID to integer
-    departmentID, err := strconv.Atoi(departmentIDStr)
+        return    }
+    
+    departmentID, err := strconv.Atoi(idStr)
     if err != nil {
-        utils.BadRequest(w, "Invalid department ID format")
-        return
-    }
+        utils.BadRequest(w, "Department ID is required")
+        return   
+     }
 
     switch r.Method {
     case http.MethodPatch:
@@ -77,49 +60,43 @@ func (h *DepartmentHandler) HandleDepartmentWithID(w http.ResponseWriter, r *htt
 }
 
 func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Request) {
-    var req struct {
-        Name string `json:"name"`
-    }
+
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get manager ID from context
-    managerID, ok := r.Context().Value("user_id").(int)
+    claims, ok := r.Context().Value(constants.JWTKey).(*utils.Claims)
+	if !ok {
+		http.Error(w, "User not aunthenticated", http.StatusUnauthorized)
+		return
+	} 
     if !ok {
-        WriteJSONError(w,
-            http.StatusUnauthorized,
+        utils.SendErrorResponse(w, 
             "Invalid user ID format",
-            "UNAUTHORIZED",
-            "Invalid user_id type in token context")
+            http.StatusUnauthorized)
         return
     }
 
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        WriteJSONError(w, 
-            http.StatusBadRequest,
+        utils.SendErrorResponse(w, 
             "Invalid request body",
-            "INVALID_REQUEST",
-            err.Error())
+            http.StatusBadRequest)
         return
     }
 
     // Validate name
     if len(req.Name) < 4 || len(req.Name) > 33 {
-        WriteJSONError(w, 
-            http.StatusBadRequest,
+        utils.SendErrorResponse(w, 
             "Name must be between 4 and 33 characters",
-            "INVALID_NAME_LENGTH",
-            fmt.Sprintf("Got length %d, expected length between 4 and 33", len(req.Name)))
+            http.StatusBadRequest)
         return
     }
 
-    dept, err := h.service.CreateDepartment(req.Name, managerID)
+    dept, err := h.service.CreateDepartment(req.Name, claims.ID)
     if err != nil {
-        WriteJSONError(w, 
-            http.StatusInternalServerError,
+        utils.SendErrorResponse(w, 
             "Failed to create department",
-            "INTERNAL_ERROR",
-            err.Error())
+            http.StatusInternalServerError)
         return
     }
 
