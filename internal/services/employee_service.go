@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
-	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 )
 
 type EmployeeService interface {
@@ -15,10 +15,10 @@ type EmployeeService interface {
 }
 
 type employeeService struct {
-	repo repositories.EmployeeRepository
+	repo repository.EmployeeRepository
 }
 
-func NewEmployeeService(repo repositories.EmployeeRepository) EmployeeService {
+func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
 	return &employeeService{
 		repo: repo,
 	}

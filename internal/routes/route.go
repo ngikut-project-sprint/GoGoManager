@@ -12,7 +12,7 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/database"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/handlers"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/middleware"
-	repositories "github.com/ngikut-project-sprint/GoGoManager/internal/repository"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
@@ -38,7 +38,7 @@ func ManagersRouter(mux *http.ServeMux, cfg *config.Config, manager_service serv
 }
 
 func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
-	repo := repositories.NewEmployeeRepository(db)
+	repo := repository.NewEmployeeRepository(db)
 	service := services.NewEmployeeService(repo)
 	handler := handlers.NewEmployeeHandler(service)
 
