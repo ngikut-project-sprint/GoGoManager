@@ -33,7 +33,9 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	var credential utils.Credential
 
-	err := json.NewDecoder(r.Body).Decode(&credential)
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&credential)
 	if err != nil {
 		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return

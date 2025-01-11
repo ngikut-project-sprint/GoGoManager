@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -18,7 +20,7 @@ type ManagerRepository interface {
 	GetAll() ([]models.Manager, *utils.GoGoError)
 	GetByID(id int) (*models.Manager, *utils.GoGoError)
 	GetByEmail(email string) (*models.Manager, *utils.GoGoError)
-	Update(manager *models.Manager) *utils.GoGoError
+	Update(manager *utils.ManagerRequest) *utils.GoGoError
 }
 
 type managerRepository struct {
@@ -113,51 +115,80 @@ func (r *managerRepository) GetByEmail(email string) (*models.Manager, *utils.Go
 
 	err := r.db.QueryRow(query, email).Scan(&manager.ID, &manager.Email, &manager.Password, &manager.Name, &manager.UserImageUri, &manager.CompanyName, &manager.CompanyImageUri, &manager.CreatedAt, &manager.UpdatedAt, &manager.DeletedAt)
 	if err != nil {
+		log.Println(err)
 		return nil, utils.WrapError(err, utils.SQLError, "Error querying manager by email")
 	}
 
 	return &manager, nil
 }
 
-func (r *managerRepository) Update(manager *models.Manager) *utils.GoGoError {
+func (r *managerRepository) Update(manager *utils.ManagerRequest) *utils.GoGoError {
 	query := "UPDATE managers SET "
 	var params []interface{}
 	var setClauses []string
 	paramCounter := 1
 
-	if manager.ValidEmail() {
+	if manager.Email != nil {
+		if !manager.ValidEmail() {
+			err := errors.New("invalid email format")
+			return utils.WrapError(err, utils.InvalidEmailFormat, "Invalid email")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("email = $%d", paramCounter))
-		params = append(params, &manager.Email)
+		params = append(params, *manager.Email)
 		paramCounter++
 	}
 
-	if manager.ValidPassword() {
+	if manager.Password != nil {
+		if !manager.ValidPassword() {
+			err := errors.New("invalid password format")
+			return utils.WrapError(err, utils.InvalidPasswordLength, "Invalid password")
+		}
+		hashedPassword, err := r.hashPassword([]byte(*manager.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return utils.WrapError(err, utils.SQLError, "Error hashing password")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("password = $%d", paramCounter))
-		params = append(params, &manager.Password)
+		params = append(params, hashedPassword)
 		paramCounter++
 	}
 
-	if manager.ValidName() {
+	if manager.Name != nil {
+		if !manager.ValidName() {
+			err := errors.New("invalid name length")
+			return utils.WrapError(err, utils.InvalidNameLength, "Invalid name")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("name = $%d", paramCounter))
-		params = append(params, &manager.Email)
+		params = append(params, *manager.Name)
 		paramCounter++
 	}
 
-	if manager.ValidImageURI() {
+	if manager.UserImageUri != nil {
+		if !manager.ValidImageURI() {
+			err := errors.New("invalid user image uri format")
+			return utils.WrapError(err, utils.InvalidURIFormat, "Invalid user image uri")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("user_image_uri = $%d", paramCounter))
-		params = append(params, &manager.Email)
+		params = append(params, *manager.UserImageUri)
 		paramCounter++
 	}
 
-	if manager.ValidCompanyName() {
+	if manager.CompanyName != nil {
+		if !manager.ValidCompanyName() {
+			err := errors.New("invalid company name length")
+			return utils.WrapError(err, utils.InvalidNameLength, "Invalid company name")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("company_name = $%d", paramCounter))
-		params = append(params, &manager.Email)
+		params = append(params, *manager.CompanyName)
 		paramCounter++
 	}
 
-	if manager.ValidCompanyImageURI() {
+	if manager.CompanyImageUri != nil {
+		if !manager.ValidCompanyImageURI() {
+			err := errors.New("invalid company image uri format")
+			return utils.WrapError(err, utils.InvalidURIFormat, "Invalid company image uri")
+		}
 		setClauses = append(setClauses, fmt.Sprintf("company_image_uri = $%d", paramCounter))
-		params = append(params, &manager.Email)
+		params = append(params, *manager.CompanyImageUri)
 		paramCounter++
 	}
 
@@ -170,8 +201,7 @@ func (r *managerRepository) Update(manager *models.Manager) *utils.GoGoError {
 
 	_, err := r.db.Exec(query, params...)
 	if err != nil {
-		return utils.WrapError(err, utils.SQLError, "Error update manager")
-	} else {
-		return nil
+		return utils.WrapError(err, utils.SQLError, "Error updating manager")
 	}
+	return nil
 }

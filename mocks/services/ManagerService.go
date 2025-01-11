@@ -261,7 +261,7 @@ func (_c *ManagerService_GetByID_Call) RunAndReturn(run func(int) (*models.Manag
 }
 
 // Update provides a mock function with given fields: manager
-func (_m *ManagerService) Update(manager *models.Manager) *utils.GoGoError {
+func (_m *ManagerService) Update(manager *utils.ManagerRequest) *utils.GoGoError {
 	ret := _m.Called(manager)
 
 	if len(ret) == 0 {
@@ -269,7 +269,7 @@ func (_m *ManagerService) Update(manager *models.Manager) *utils.GoGoError {
 	}
 
 	var r0 *utils.GoGoError
-	if rf, ok := ret.Get(0).(func(*models.Manager) *utils.GoGoError); ok {
+	if rf, ok := ret.Get(0).(func(*utils.ManagerRequest) *utils.GoGoError); ok {
 		r0 = rf(manager)
 	} else {
 		if ret.Get(0) != nil {
@@ -286,14 +286,14 @@ type ManagerService_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - manager *models.Manager
+//   - manager *utils.ManagerRequest
 func (_e *ManagerService_Expecter) Update(manager interface{}) *ManagerService_Update_Call {
 	return &ManagerService_Update_Call{Call: _e.mock.On("Update", manager)}
 }
 
-func (_c *ManagerService_Update_Call) Run(run func(manager *models.Manager)) *ManagerService_Update_Call {
+func (_c *ManagerService_Update_Call) Run(run func(manager *utils.ManagerRequest)) *ManagerService_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*models.Manager))
+		run(args[0].(*utils.ManagerRequest))
 	})
 	return _c
 }
@@ -303,7 +303,7 @@ func (_c *ManagerService_Update_Call) Return(_a0 *utils.GoGoError) *ManagerServi
 	return _c
 }
 
-func (_c *ManagerService_Update_Call) RunAndReturn(run func(*models.Manager) *utils.GoGoError) *ManagerService_Update_Call {
+func (_c *ManagerService_Update_Call) RunAndReturn(run func(*utils.ManagerRequest) *utils.GoGoError) *ManagerService_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

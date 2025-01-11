@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
@@ -63,4 +64,43 @@ func (m Manager) ValidCompanyImageURI() bool {
 
 	err := validators.ValidateURI(*m.CompanyImageUri)
 	return m.CompanyImageUri != nil && err == nil
+}
+
+func (m Manager) ToManagerResponse() utils.ManagerResponse {
+	var (
+		name            string
+		userImageUri    string
+		companyName     string
+		companyImageUri string
+	)
+
+	if m.Name != nil {
+		name = *m.Name
+	} else {
+		name = ""
+	}
+	if m.UserImageUri != nil {
+		userImageUri = *m.UserImageUri
+	} else {
+		userImageUri = ""
+	}
+	if m.CompanyName != nil {
+		companyName = *m.CompanyName
+	} else {
+		companyName = ""
+	}
+
+	if m.CompanyImageUri != nil {
+		companyImageUri = *m.CompanyImageUri
+	} else {
+		companyImageUri = ""
+	}
+
+	return utils.ManagerResponse{
+		Email:           m.Email,
+		Name:            name,
+		UserImageUri:    userImageUri,
+		CompanyName:     companyName,
+		CompanyImageUri: companyImageUri,
+	}
 }

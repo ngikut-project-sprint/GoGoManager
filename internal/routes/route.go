@@ -20,14 +20,20 @@ import (
 func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
 	ManagerRouter(mux, cfg, db)
+
 	return mux
 }
-
 func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	dbAdapter := &database.SqlDBAdapter{DB: db}
 	repo := repository.NewManagerRepository(dbAdapter, bcrypt.GenerateFromPassword)
 	service := services.NewManagerService(repo, validators.ValidateEmail, validators.ValidatePassword)
 	AuthRouter(mux, cfg, service)
+	ManagersRouter(mux, cfg, service)
+}
+
+func ManagersRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {
+	handler := handlers.NewManagerHandler(manager_service)
+	mux.Handle("/v1/user", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.Manager))))
 }
 
 func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services.ManagerService) {

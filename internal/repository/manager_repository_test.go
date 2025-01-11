@@ -539,27 +539,29 @@ func TestManagerRepository_Update_Success(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
-	manager := &models.Manager{
+	hashedPassword := []byte("$2a$10$hashedpasswordexample")
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "test1@example.com",
-		Password:        "hashedpassword1",
+		Email:           ptr("test1@example.com"),
+		Password:        ptr("hashedpassword1"),
 		Name:            ptr("Manager One"),
-		UserImageUri:    ptr("image1.png"),
+		UserImageUri:    ptr("http://aws-s3.com/image1.png"),
 		CompanyName:     ptr("Company A"),
-		CompanyImageUri: ptr("company1.png"),
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
+		CompanyImageUri: ptr("http://aws-s3.com/company1.png"),
 	}
 
-	query := `UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`
+	query := `UPDATE managers SET email = $1, password = $2, name = $3, user_image_uri = $4, company_name = $5, company_image_uri = $6, updated_at = $7 WHERE id = $8`
+
+	mockEncrypt.On("GenerateFromPassword", []byte(*manager.Password), bcrypt.DefaultCost).Return(hashedPassword, nil)
 
 	mockDB.On("Exec",
 		query,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("[]uint8"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, nil)
@@ -578,22 +580,19 @@ func TestManagerRepository_Update_NoField(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
-	manager := &models.Manager{
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "old_email@example.com",
-		Password:        "",
+		Email:           ptr("old_email@example.com"),
+		Password:        nil,
 		Name:            nil,
 		UserImageUri:    nil,
 		CompanyName:     nil,
 		CompanyImageUri: nil,
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
 	}
 
 	mockDB.On("Exec",
 		`UPDATE managers SET email = $1, updated_at = $2 WHERE id = $3`,
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, nil)
@@ -612,25 +611,29 @@ func TestManagerRepository_Update_ExecError(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
-	manager := &models.Manager{
+	hashedPassword := []byte("$2a$10$hashedpasswordexample")
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "new_email@example.com",
-		Password:        "new_password",
-		Name:            ptr("New Name"),
-		UserImageUri:    ptr("new_image_uri"),
-		CompanyName:     ptr("New Company"),
-		CompanyImageUri: ptr("new_company_image"),
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
+		Email:           ptr("test1@example.com"),
+		Password:        ptr("hashedpassword1"),
+		Name:            ptr("Manager One"),
+		UserImageUri:    ptr("http://aws-s3.com/image1.png"),
+		CompanyName:     ptr("Company A"),
+		CompanyImageUri: ptr("http://aws-s3.com/company1.png"),
 	}
 
+	query := `UPDATE managers SET email = $1, password = $2, name = $3, user_image_uri = $4, company_name = $5, company_image_uri = $6, updated_at = $7 WHERE id = $8`
+
+	mockEncrypt.On("GenerateFromPassword", []byte(*manager.Password), bcrypt.DefaultCost).Return(hashedPassword, nil)
+
 	mockDB.On("Exec",
-		`UPDATE managers SET email = $1, password = $2, name = $3, company_name = $4, updated_at = $5 WHERE id = $6`,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		query,
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("[]uint8"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, errors.New("Database error"))
@@ -649,23 +652,20 @@ func TestManagerRepository_Update_PartialUpdate(t *testing.T) {
 
 	repo := repository.NewManagerRepository(mockDB, mockEncrypt.GenerateFromPassword)
 
-	manager := &models.Manager{
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "new_email@example.com",
-		Password:        "",
+		Email:           ptr("new_email@example.com"),
+		Password:        nil,
 		Name:            ptr("New Name"),
 		UserImageUri:    nil,
 		CompanyName:     nil,
 		CompanyImageUri: nil,
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
 	}
 
 	mockDB.On("Exec",
 		`UPDATE managers SET email = $1, name = $2, updated_at = $3 WHERE id = $4`,
-		mock.AnythingOfType("*string"),
-		mock.AnythingOfType("*string"),
+		mock.AnythingOfType("string"),
+		mock.AnythingOfType("string"),
 		mock.AnythingOfType("time.Time"),
 		mock.AnythingOfType("int"),
 	).Return(nil, errors.New("Database error"))

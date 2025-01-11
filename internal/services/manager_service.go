@@ -13,7 +13,7 @@ type ManagerService interface {
 	GetAll() ([]models.Manager, *utils.GoGoError)
 	GetByID(id int) (*models.Manager, *utils.GoGoError)
 	GetByEmail(email string) (*models.Manager, *utils.GoGoError)
-	Update(manager *models.Manager) *utils.GoGoError
+	Update(manager *utils.ManagerRequest) *utils.GoGoError
 }
 
 type ValidEmailFunc func(email string) error
@@ -70,6 +70,6 @@ func (s *managerService) GetByEmail(email string) (*models.Manager, *utils.GoGoE
 	return s.managerRepo.GetByEmail(email)
 }
 
-func (s *managerService) Update(manager *models.Manager) *utils.GoGoError {
+func (s *managerService) Update(manager *utils.ManagerRequest) *utils.GoGoError {
 	return s.managerRepo.Update(manager)
 }

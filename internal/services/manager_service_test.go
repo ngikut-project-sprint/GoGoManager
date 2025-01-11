@@ -322,17 +322,14 @@ func TestManagerService_UpdateManager_Success(t *testing.T) {
 	mockPwdValidator := &mocksValidators.PasswordValidator{}
 	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
 
-	manager := &models.Manager{
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "test1@example.com",
-		Password:        "hashedpassword1",
+		Email:           ptr("test1@example.com"),
+		Password:        ptr("hashedpassword1"),
 		Name:            ptr("Manager One"),
 		UserImageUri:    ptr("image1.png"),
 		CompanyName:     ptr("Company A"),
 		CompanyImageUri: ptr("company1.png"),
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
 	}
 
 	mockRepo.On("Update", manager).Return(nil)
@@ -354,17 +351,14 @@ func TestManagerService_UpdateManager_Error(t *testing.T) {
 
 	error := &utils.GoGoError{Err: errors.New("Database error")}
 
-	manager := &models.Manager{
+	manager := &utils.ManagerRequest{
 		ID:              1,
-		Email:           "test1@example.com",
-		Password:        "hashedpassword1",
+		Email:           ptr("test1@example.com"),
+		Password:        ptr("hashedpassword1"),
 		Name:            ptr("Manager One"),
 		UserImageUri:    ptr("image1.png"),
 		CompanyName:     ptr("Company A"),
 		CompanyImageUri: ptr("company1.png"),
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		DeletedAt:       nil,
 	}
 
 	mockRepo.On("Update", manager).Return(error)
