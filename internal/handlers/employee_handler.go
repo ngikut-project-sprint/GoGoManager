@@ -178,12 +178,10 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request, identit
 	err := h.service.Delete(r.Context(), identityNumber)
 	if err != nil {
 		switch {
+		case strings.Contains(err.Error(), "missing JWT claims"):
+			utils.SendErrorResponse(w, "expired / invalid / missing request token", http.StatusUnauthorized)
 		case err.Error() == "employee not found":
 			utils.SendErrorResponse(w, fmt.Sprintf("identityNumber %s is not found", identityNumber), http.StatusNotFound)
-		case strings.Contains(err.Error(), "unauthorized") ||
-			strings.Contains(err.Error(), "expired token") ||
-			strings.Contains(err.Error(), "invalid token"):
-			utils.SendErrorResponse(w, "expired / invalid / missing request token", http.StatusUnauthorized)
 		default:
 			utils.SendErrorResponse(w, "Server Error", http.StatusInternalServerError)
 		}

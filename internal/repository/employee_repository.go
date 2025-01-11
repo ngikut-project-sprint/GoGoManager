@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
 
 type EmployeeRepository interface {
@@ -26,14 +28,21 @@ func NewEmployeeRepository(db *sql.DB) EmployeeRepository {
 }
 
 func (r *employeeRepository) List(ctx context.Context, filter models.FilterOptions) ([]models.Employee, error) {
+	claims, ok := ctx.Value(constants.JWTKey).(*utils.Claims)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized: missing or invalid JWT claims")
+	}
+
 	query := `
-        SELECT id, identity_number, name, employee_image_uri, gender, department_id, 
-               created_at, updated_at, deleted_at
-        FROM employees
-        WHERE deleted_at IS NULL
-    `
-	args := []interface{}{}
-	argCount := 1
+			SELECT e.id, e.identity_number, e.name, e.employee_image_uri, e.gender, e.department_id, 
+						 e.created_at, e.updated_at, e.deleted_at
+			FROM employees e
+			JOIN departments d ON e.department_id = d.department_id
+			WHERE e.deleted_at IS NULL
+			AND d.manager_id = $1
+	`
+	args := []interface{}{claims.ID} // Current manager's ID from JWT
+	argCount := 2                    // Start from 2 since we used $1 for manager_id
 
 	if filter.IdentityNumber != nil {
 		query += fmt.Sprintf(" AND identity_number LIKE $%d", argCount)
@@ -125,6 +134,45 @@ func (r *employeeRepository) Create(ctx context.Context, employee *models.Employ
 }
 
 func (r *employeeRepository) Update(ctx context.Context, identityNumber string, req models.UpdateEmployeeRequest) (*models.Employee, error) {
+	claims, ok := ctx.Value(constants.JWTKey).(*utils.Claims)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized: missing or invalid JWT claims")
+	}
+
+	var existingDeptID int
+	err := r.db.QueryRowContext(ctx, `
+			SELECT e.department_id 
+			FROM employees e
+			JOIN departments d ON e.department_id = d.department_id
+			WHERE e.identity_number = $1 
+			AND e.deleted_at IS NULL 
+			AND d.manager_id = $2`,
+		identityNumber, claims.ID,
+	).Scan(&existingDeptID)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("employee not found or unauthorized")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error verifying employee: %w", err)
+	}
+
+	if req.DepartmentID != nil {
+		var count int
+		err := r.db.QueryRowContext(ctx,
+			"SELECT COUNT(*) FROM departments WHERE department_id = $1 AND manager_id = $2 AND deleted_at IS NULL",
+			*req.DepartmentID, claims.ID,
+		).Scan(&count)
+
+		if err != nil {
+			return nil, fmt.Errorf("error verifying new department: %w", err)
+		}
+
+		if count == 0 {
+			return nil, fmt.Errorf("unauthorized: new department does not belong to the current manager")
+		}
+	}
+
 	// Build dynamic update query
 	query := "UPDATE employees SET updated_at = NOW()"
 	args := []interface{}{}
@@ -157,13 +205,12 @@ func (r *employeeRepository) Update(ctx context.Context, identityNumber string, 
 		argCount++
 	}
 
-	// Add WHERE clause and RETURNING
 	query += fmt.Sprintf(" WHERE identity_number = $%d AND deleted_at IS NULL", argCount)
 	args = append(args, identityNumber)
 	query += " RETURNING id, identity_number, name, employee_image_uri, gender, department_id, created_at, updated_at, deleted_at"
 
 	var employee models.Employee
-	err := r.db.QueryRowContext(ctx, query, args...).Scan(
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(
 		&employee.ID,
 		&employee.IdentityNumber,
 		&employee.Name,
@@ -185,13 +232,22 @@ func (r *employeeRepository) Update(ctx context.Context, identityNumber string, 
 }
 
 func (r *employeeRepository) Delete(ctx context.Context, identityNumber string) error {
+	claims, ok := ctx.Value(constants.JWTKey).(*utils.Claims)
+	if !ok {
+		return fmt.Errorf("unauthorized: missing or invalid JWT claims")
+	}
+
 	query := `
-			UPDATE employees 
-			SET deleted_at = NOW() 
-			WHERE identity_number = $1 AND deleted_at IS NULL
+			UPDATE employees e
+			SET deleted_at = NOW()
+			FROM departments d
+			WHERE e.department_id = d.department_id
+			AND e.identity_number = $1 
+			AND e.deleted_at IS NULL
+			AND d.manager_id = $2
 	`
 
-	result, err := r.db.ExecContext(ctx, query, identityNumber)
+	result, err := r.db.ExecContext(ctx, query, identityNumber, claims.ID)
 	if err != nil {
 		return fmt.Errorf("error deleting employee: %w", err)
 	}
@@ -202,7 +258,7 @@ func (r *employeeRepository) Delete(ctx context.Context, identityNumber string) 
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("employee not found")
+		return fmt.Errorf("employee not found") // Changed this line
 	}
 
 	return nil
