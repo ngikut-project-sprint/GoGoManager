@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -85,10 +86,14 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(utils.Response{
+	if err := json.NewEncoder(w).Encode(utils.Response{
 		Data:    response,
 		Message: fmt.Sprintf("Successfully retrieved %d employees", len(response)),
-	})
+	}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -122,10 +127,14 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(utils.Response{
+	if err := json.NewEncoder(w).Encode(utils.Response{
 		Data:    response,
 		Message: fmt.Sprintf("Employee with ID %s created successfully", response.IdentityNumber),
-	})
+	}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identityNumber string) {
@@ -155,10 +164,14 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identit
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(utils.Response{
+	if err := json.NewEncoder(w).Encode(utils.Response{
 		Data:    response,
 		Message: fmt.Sprintf("Employee with ID %s updated successfully", response.IdentityNumber),
-	})
+	}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request, identityNumber string) {
@@ -179,7 +192,11 @@ func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request, identit
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(utils.Response{
+	if err := json.NewEncoder(w).Encode(utils.Response{
 		Message: fmt.Sprintf("Employee with ID %s deleted successfully", identityNumber),
-	})
+	}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
