@@ -5,7 +5,6 @@ import (
     "net/http"
     "strconv"
     "log"
-	"fmt"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
     "github.com/ngikut-project-sprint/GoGoManager/internal/services"
@@ -136,46 +135,25 @@ func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Requ
     // Get manager ID from token
     userID, ok := r.Context().Value("user_id").(int)
     if !ok {
-        utils.WriteJSONError(w,
-            http.StatusUnauthorized,
-            "User ID not found in token",
-            "UNAUTHORIZED",
-            "Missing or invalid user_id in token")
+        utils.SendErrorResponse(w, "User ID not found in token", http.StatusUnauthorized)
         return
     }
 
-    // Parse request body
-    var req struct {
-        Name string `json:"name"`
-    }
-
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        utils.WriteJSONError(w,
-            http.StatusBadRequest,
-            "Invalid request body",
-            "INVALID_REQUEST",
-            err.Error())
+        utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
         return
     }
 
     // Validate name
     if len(req.Name) < 4 || len(req.Name) > 33 {
-        utils.WriteJSONError(w,
-            http.StatusBadRequest,
-            "Name must be between 4 and 33 characters",
-            "INVALID_NAME_LENGTH",
-            fmt.Sprintf("Got length %d, expected length between 4 and 33", len(req.Name)))
+        utils.SendErrorResponse(w, "Name must be between 4 and 33 characters", http.StatusBadRequest)
         return
     }
 
     // Update department
     dept, err := h.service.UpdateDepartment(departmentID, req.Name, userID)
     if err != nil {
-        utils.WriteJSONError(w,
-            http.StatusInternalServerError,
-            "Failed to update department",
-            "INTERNAL_ERROR",
-            err.Error())
+        utils.SendErrorResponse(w, "Failed to update department", http.StatusInternalServerError)
         return
     }
 
@@ -188,22 +166,14 @@ func (h *DepartmentHandler) DeleteDepartment(w http.ResponseWriter, r *http.Requ
     // Get manager ID from token
     userID, ok := r.Context().Value("user_id").(int)
     if !ok {
-        utils.WriteJSONError(w,
-            http.StatusUnauthorized,
-            "User ID not found in token",
-            "UNAUTHORIZED",
-            "Missing or invalid user_id in token")
+        utils.SendErrorResponse(w, "User ID not found in token", http.StatusUnauthorized)
         return
     }
 
     // Delete department
     err := h.service.DeleteDepartment(departmentID, userID)
-    if err != nil {
-        utils.WriteJSONError(w,
-            http.StatusInternalServerError,
-            "Failed to delete department",
-            "DELETE_ERROR",
-            err.Error())
+    if err != nil {       
+        utils.SendErrorResponse(w, "Failed to delete department", http.StatusUnauthorized)
         return
     }
 
