@@ -9,6 +9,7 @@ import (
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/services"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/utils"
 )
 
 type EmployeeHandler struct {
@@ -67,7 +68,7 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	employees, err := h.service.List(r.Context(), filter)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		utils.SendErrorResponse(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -83,13 +84,17 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(utils.Response{
+		Data:    response,
+		Message: fmt.Sprintf("Successfully retrieved %d employees", len(response)),
+	})
 }
 
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateEmployeeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -97,24 +102,13 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Create new employee
 	employee, err := h.service.Create(r.Context(), req)
 	if err != nil {
-		// Create response struct for error cases
-		type ErrorResponse struct {
-			Message string `json:"message"`
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-
 		switch {
 		case strings.Contains(err.Error(), "unique_identity_number"):
-			w.WriteHeader(http.StatusConflict)
-			json.NewEncoder(w).Encode(ErrorResponse{
-				Message: fmt.Sprintf("Identity number %s is already registered", req.IdentityNumber),
-			})
-			return
+			utils.SendErrorResponse(w, fmt.Sprintf("Identity number %s is already registered", req.IdentityNumber), http.StatusConflict)
 		default:
-			http.Error(w, "Failed to create employee", http.StatusInternalServerError)
-			return
+			utils.SendErrorResponse(w, "Failed to create employee", http.StatusInternalServerError)
 		}
+		return
 	}
 
 	// Prepare response
@@ -128,14 +122,17 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(utils.Response{
+		Data:    response,
+		Message: fmt.Sprintf("Employee with ID %s created successfully", response.IdentityNumber),
+	})
 }
 
 func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identityNumber string) {
 	// Decode request body
 	var req models.UpdateEmployeeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -143,7 +140,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identit
 	// Update employee
 	employee, err := h.service.Update(r.Context(), identityNumber, req)
 	if err != nil {
-		http.Error(w, "Failed to update employee", http.StatusInternalServerError)
+		utils.SendErrorResponse(w, "Failed to update employee", http.StatusInternalServerError)
 		return
 	}
 
@@ -157,49 +154,32 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identit
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(utils.Response{
+		Data:    response,
+		Message: fmt.Sprintf("Employee with ID %s updated successfully", response.IdentityNumber),
+	})
 }
 
 func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request, identityNumber string) {
 	err := h.service.Delete(r.Context(), identityNumber)
 	if err != nil {
-		// Create response struct for error cases
-		type ErrorResponse struct {
-			Message string `json:"message"`
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-
 		switch {
 		case err.Error() == "employee not found":
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(ErrorResponse{
-				Message: fmt.Sprintf("identityNumber %s is not found", identityNumber),
-			})
-			return
-
+			utils.SendErrorResponse(w, fmt.Sprintf("identityNumber %s is not found", identityNumber), http.StatusNotFound)
 		case strings.Contains(err.Error(), "unauthorized") ||
 			strings.Contains(err.Error(), "expired token") ||
 			strings.Contains(err.Error(), "invalid token"):
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(ErrorResponse{
-				Message: "expired / invalid / missing request token",
-			})
-			return
-
+			utils.SendErrorResponse(w, "expired / invalid / missing request token", http.StatusUnauthorized)
 		default:
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(ErrorResponse{
-				Message: "Server Error",
-			})
-			return
+			utils.SendErrorResponse(w, "Server Error", http.StatusInternalServerError)
 		}
+		return
 	}
 
-	// Success case - 200 OK with message
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK) // 200
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Ok deleted",
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(utils.Response{
+		Message: fmt.Sprintf("Employee with ID %s deleted successfully", identityNumber),
 	})
 }
