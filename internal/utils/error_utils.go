@@ -3,12 +3,10 @@ package utils
 import (
     "encoding/json"
     "net/http"
-    
-    "github.com/ngikut-project-sprint/GoGoManager/internal/models"
 )
 
 func WriteJSONError(w http.ResponseWriter, status int, message string, code string, details string) {
-    errorResponse := models.ErrorResponse{
+    errorResponse := ErrorResponse{
         Status:  status,
         Message: message,
         Code:    code,

@@ -43,12 +43,12 @@ func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services
 }
 
 func DepartmentRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
-    repo := repositories.NewDepartmentRepository(db)
+    repo := repository.NewDepartmentRepository(db)
     service := services.NewDepartmentService(repo)
     handler := handlers.NewDepartmentHandler(service)
 
     mux.Handle("/department", middleware.ConfigMiddleware(cfg, 
-        middleware.AuthMiddleware(http.HandlerFunc(handler.HandleDepartment))))
+        middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartment))))
     mux.Handle("/department/", middleware.ConfigMiddleware(cfg, 
-        middleware.AuthMiddleware(http.HandlerFunc(handler.HandleDepartmentWithID))))
+        middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartmentWithID))))
 }

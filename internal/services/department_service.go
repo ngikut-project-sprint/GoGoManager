@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ngikut-project-sprint/GoGoManager/internal/repositories"
+	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 )
 
 var (
@@ -20,7 +20,7 @@ type DepartmentService interface {
 }
 
 type departmentService struct {
-	repo repositories.DepartmentRepository
+	repo repository.DepartmentRepository
 }
 
 // First, make sure your DepartmentResponse struct is defined correctly
@@ -30,7 +30,7 @@ type DepartmentResponse struct {
 }
 
 // Constructor
-func NewDepartmentService(repo repositories.DepartmentRepository) DepartmentService {
+func NewDepartmentService(repo repository.DepartmentRepository) DepartmentService {
 	return &departmentService{
 		repo: repo,
 	}

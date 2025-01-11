@@ -10,7 +10,6 @@ import (
 
     "github.com/ngikut-project-sprint/GoGoManager/internal/services"
     "github.com/ngikut-project-sprint/GoGoManager/internal/utils"
-    "github.com/ngikut-project-sprint/GoGoManager/internal/models"
 )
 
 type DepartmentHandler struct {
@@ -18,7 +17,7 @@ type DepartmentHandler struct {
 }
 
 func WriteJSONError(w http.ResponseWriter, status int, message string, code string, details string) {
-    errorResponse := models.ErrorResponse{
+    errorResponse := utils.ErrorResponse{
         Status:  status,
         Message: message,
         Code:    code,
