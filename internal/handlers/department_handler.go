@@ -61,7 +61,6 @@ func (h *DepartmentHandler) HandleDepartmentWithID(w http.ResponseWriter, r *htt
 
 func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Request) {
 
-
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
     // Get manager ID from context
