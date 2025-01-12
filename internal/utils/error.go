@@ -17,6 +17,8 @@ const (
 	SQLError
 	SQLUniqueViolated
 	PasswordHashFailed
+	InvalidFileSize
+	InvalidFileType
 )
 
 type GoGoError struct {

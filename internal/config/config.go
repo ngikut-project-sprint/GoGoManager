@@ -18,9 +18,17 @@ type JWTConfig struct {
 	Secret string `env:"JWT_SECRET"`
 }
 
+type AWSConfig struct {
+	Region     string `env:"AWS_REGION"`
+	AccessKey  string `env:"AWS_ACCESS_KEY_ID"`
+	SecretKey  string `env:"AWS_SECRET_ACCESS_KEY"`
+	BucketName string `env:"AWS_BUCKET_NAME"`
+}
+
 type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
+	AWS      AWSConfig
 }
 
 func Get() (*Config, error) {
