@@ -17,6 +17,7 @@ type ManagerHandler struct {
 func NewManagerHandler(managerService services.ManagerService) *ManagerHandler {
 	return &ManagerHandler{managerService: managerService}
 }
+
 func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -37,14 +38,10 @@ func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	response := manager.ToManagerResponse()
 
-	jsonResponse, error := json.Marshal(response)
-	if error != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(jsonResponse); err != nil {
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Println("Failed to write response:", err)
 		utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -105,18 +102,17 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := result.ToManagerResponse()
-	jsonResponse, jsonErr := json.Marshal(response)
-	if jsonErr != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(jsonResponse); err != nil {
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Println("Failed to write response:", err)
 		utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 }
+
 func (h *ManagerHandler) Manager(w http.ResponseWriter, r *http.Request) {
 	http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {

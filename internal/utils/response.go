@@ -12,3 +12,8 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
     json.NewEncoder(w).Encode(data)
 }
 
+// For general response
+type Response struct {
+	Data    interface{} `json:"data,omitempty"`
+	Message string      `json:"message,omitempty"`
+}

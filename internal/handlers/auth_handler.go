@@ -83,6 +83,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
+
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			log.Printf("Failed to send response to %s: %v", credential.Email, err)
 			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
@@ -116,6 +117,7 @@ func (h *AuthHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			log.Printf("Failed to send response to %d: %v", manager.ID, err)
 			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
