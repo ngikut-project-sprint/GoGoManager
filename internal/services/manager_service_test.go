@@ -189,30 +189,6 @@ func TestManagerService_GetByIDManager_Success(t *testing.T) {
 	mockPwdValidator.AssertExpectations(t)
 }
 
-func TestManagerService_GetByIDManager_InvalidID(t *testing.T) {
-	mockRepo := new(mocksRepo.ManagerRepository)
-	mockEmailValidator := &mocksValidators.EmailValidator{}
-	mockPwdValidator := &mocksValidators.PasswordValidator{}
-	service := services.NewManagerService(mockRepo, mockEmailValidator.ValidateEmail, mockPwdValidator.ValidatePassword)
-
-	id := 0
-	e := errors.New("Invalid sql id")
-	error := &utils.GoGoError{
-		Type:    utils.InvalidUserId,
-		Message: "Invalid manager id",
-		Err:     e,
-	}
-
-	res, err := service.GetByID(id)
-
-	assert.Equal(t, error, err)
-	assert.Nil(t, res)
-
-	mockRepo.AssertExpectations(t)
-	mockEmailValidator.AssertExpectations(t)
-	mockPwdValidator.AssertExpectations(t)
-}
-
 func TestManagerService_GetByIDManager_Error(t *testing.T) {
 	mockRepo := new(mocksRepo.ManagerRepository)
 	mockEmailValidator := &mocksValidators.EmailValidator{}

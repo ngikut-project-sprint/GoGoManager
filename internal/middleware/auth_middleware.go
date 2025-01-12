@@ -42,7 +42,7 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		// Parse token to jwt
 		token, err := parseJWT(tokenString, &utils.Claims{}, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 			}
 			return []byte(cfg.JWT.Secret), nil
 		})
@@ -66,6 +66,16 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), constants.JWTKey, claims)
+
+		// Create a custom type for context keys (typically at package level)
+		type contextKey string
+
+		// Define your specific keys as constants
+		const userIDKey contextKey = "user_id"
+
+		// Then use it in your code
+		ctx = context.WithValue(ctx, userIDKey, claims.ID)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
