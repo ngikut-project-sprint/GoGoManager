@@ -1,15 +1,18 @@
 package utils
 
 import (
-    "encoding/json"
-    "net/http"
+	"encoding/json"
+	"net/http"
 )
 
 // WriteJSON writes a JSON response with the given status code and data
 func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(status)
-    json.NewEncoder(w).Encode(data)
+    if err := json.NewEncoder(w).Encode(data); err != nil {
+        SendErrorResponse(w, "Failed create department", http.StatusBadRequest)
+        return
+    }
 }
 
 // For general response

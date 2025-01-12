@@ -100,7 +100,11 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
 
     // Success response
     w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(dept)
+
+    if err := json.NewEncoder(w).Encode(dept); err != nil {
+        utils.SendErrorResponse(w, "Failed create department", http.StatusBadRequest)
+        return
+    }
 }
 
 
@@ -125,8 +129,10 @@ func (h *DepartmentHandler) ListDepartments(w http.ResponseWriter, r *http.Reque
         return
     }
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(departments)
+    if err := json.NewEncoder(w).Encode(departments); err != nil {
+        utils.SendErrorResponse(w, "Failed get department list", http.StatusBadRequest)
+        return
+    }
 }
 
 func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Request, departmentID int) { // Add departmentID parameter
