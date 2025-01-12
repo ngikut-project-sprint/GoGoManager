@@ -20,13 +20,13 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		// Get token from header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+			utils.SendErrorResponse(w, "Missing Authorization header", http.StatusUnauthorized)
 			return
 		}
 
 		tokenRaw := strings.Split(authHeader, " ")
 		if len(tokenRaw) != 2 {
-			http.Error(w, "Invalid token format", http.StatusUnauthorized)
+			utils.SendErrorResponse(w, "Invalid token format", http.StatusUnauthorized)
 			return
 		}
 		tokenString := tokenRaw[1]
@@ -35,7 +35,7 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		cfg, ok := r.Context().Value(constants.ConfigKey).(*config.Config)
 		if !ok {
 			log.Println("Configuration not found")
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			utils.SendErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
@@ -48,20 +48,20 @@ func AuthMiddleware(parseJWT utils.ParseJWT, next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			utils.SendErrorResponse(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		// Get jwt claims
 		claims, ok := token.Claims.(*utils.Claims)
 		if !ok {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			utils.SendErrorResponse(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		expirationTime := claims.ExpiresAt.Time
 		if time.Now().After(expirationTime) {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			utils.SendErrorResponse(w, "Token has expired", http.StatusUnauthorized)
 			return
 		}
 
