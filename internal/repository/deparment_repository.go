@@ -15,6 +15,7 @@ type DepartmentRepository interface {
     Update(id int, name string) (*models.Department, error) 
     Delete(id int) error                         // Added
     HasEmployees(id int) (bool, error)           // Added
+    IsDepartmentNameTaken(name string) (bool, error)
 }
 
 // Define the implementation struct
@@ -152,3 +153,14 @@ func (r *departmentRepository) HasEmployees(id int) (bool, error) {
     return count > 0, nil
 }
 
+func (r *departmentRepository) IsDepartmentNameTaken(name string) (bool, error) {
+    var count int
+    query := "SELECT COUNT(*) FROM departments WHERE name = ?"
+
+    err := r.db.QueryRow(query, name).Scan(&count)
+    if err != nil {
+        return false, err // Database error
+    }
+
+    return count > 0, nil // Return true if count > 0 (name exists)
+}

@@ -9,10 +9,11 @@ import (
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
     "github.com/ngikut-project-sprint/GoGoManager/internal/services"
     "github.com/ngikut-project-sprint/GoGoManager/internal/utils"
+    // "github.com/ngikut-project-sprint/GoGoManager/internal/repository"
 )
 
 var req struct {
-    Name string `json:"name"`
+    Name *string `json:"name"`
 }
 
 type DepartmentHandler struct {
@@ -62,6 +63,11 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
 
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
+    // Validate Content-Type header
+    if r.Header.Get("Content-Type") != "application/json" {
+        utils.SendErrorResponse(w, "Invalid content type", http.StatusBadRequest)
+        return
+    }
     // Get manager ID from context
     claims, ok := r.Context().Value(constants.JWTKey).(*utils.Claims)
 	if !ok {
@@ -82,15 +88,18 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
         return
     }
 
-    // Validate name
-    if len(req.Name) < 4 || len(req.Name) > 33 {
-        utils.SendErrorResponse(w, 
-            "Name must be between 4 and 33 characters",
-            http.StatusBadRequest)
+    if req.Name == nil {
+        utils.SendErrorResponse(w, "Name is required", http.StatusBadRequest)
         return
     }
 
-    dept, err := h.service.CreateDepartment(req.Name, claims.ID)
+    // Validate name (dereference the pointer)
+    if len(*req.Name) < 4 || len(*req.Name) > 33 {
+        utils.SendErrorResponse(w, "Name must be between 4 and 33 characters", http.StatusBadRequest)
+        return
+    }
+
+    dept, err := h.service.CreateDepartment(*req.Name, claims.ID) // Pass the dereferenced value
     if err != nil {
         utils.SendErrorResponse(w, 
             "Failed to create department",
@@ -151,13 +160,13 @@ func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Requ
     }
 
     // Validate name
-    if len(req.Name) < 4 || len(req.Name) > 33 {
+    if len(*req.Name) < 4 || len(*req.Name) > 33 {
         utils.SendErrorResponse(w, "Name must be between 4 and 33 characters", http.StatusBadRequest)
         return
     }
 
     // Update department
-    dept, err := h.service.UpdateDepartment(departmentID, req.Name, userID)
+    dept, err := h.service.UpdateDepartment(departmentID, *req.Name, userID)
     if err != nil {
         utils.SendErrorResponse(w, "Failed to update department", http.StatusInternalServerError)
         return
