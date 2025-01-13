@@ -25,7 +25,7 @@ func TestManagerService_CreateManagers_Success(t *testing.T) {
 	password := "securepassword123"
 
 	mockEmailValidator.On("ValidateEmail", email).Return(nil)
-	mockPwdValidator.On("ValidatePassword", password, 8, 52).Return(nil)
+	mockPwdValidator.On("ValidatePassword", password, 8, 32).Return(nil)
 	mockRepo.On("Create", email, password).Return(id, nil)
 
 	res, err := service.Create(email, password)
@@ -81,7 +81,7 @@ func TestManagerService_CreateManagers_InvalidPassword(t *testing.T) {
 	}
 
 	mockEmailValidator.On("ValidateEmail", email).Return(nil)
-	mockPwdValidator.On("ValidatePassword", password, 8, 52).Return(e)
+	mockPwdValidator.On("ValidatePassword", password, 8, 32).Return(e)
 
 	res, err := service.Create(email, password)
 

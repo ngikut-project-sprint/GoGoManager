@@ -40,7 +40,7 @@ func (s *managerService) Create(email string, password string) (int, *utils.GoGo
 		return 0, utils.WrapError(emailErr, utils.InvalidEmailFormat, "Invalid email format")
 	}
 
-	pwdErr := s.validatePassword(password, 8, 52)
+	pwdErr := s.validatePassword(password, 8, 32)
 	if pwdErr != nil {
 		return 0, utils.WrapError(pwdErr, utils.InvalidPasswordLength, "Invalid password length")
 	}
