@@ -3,6 +3,7 @@ package validators
 import (
 	"fmt"
 	"mime/multipart"
+	"strings"
 )
 
 type FileValidator interface {
@@ -23,10 +24,19 @@ func ValidateFileType(file multipart.FileHeader) error {
 	contentType := file.Header.Get("Content-Type")
 
 	isValidType := false
-	for _, t := range allowedTypes {
-		if contentType == t {
+
+	if contentType == "application/octet-stream" {
+		if strings.Contains(file.Filename, ".jpg") ||
+			strings.Contains(file.Filename, ".jpeg") ||
+			strings.Contains(file.Filename, ".png") {
 			isValidType = true
-			break
+		}
+	} else {
+		for _, t := range allowedTypes {
+			if contentType == t {
+				isValidType = true
+				break
+			}
 		}
 	}
 
