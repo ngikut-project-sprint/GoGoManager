@@ -2,6 +2,9 @@ package services
 
 import (
 	"context"
+	"errors"
+	"log"
+	"strconv"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/repository"
@@ -37,12 +40,18 @@ func (s *employeeService) List(ctx context.Context, filter models.FilterOptions)
 }
 
 func (s *employeeService) Create(ctx context.Context, req models.CreateEmployeeRequest) (*models.Employee, error) {
+	departID, err := strconv.Atoi(req.DepartmentID)
+	if err != nil {
+		log.Println("error: ", err.Error())
+		return nil, errors.New("Failed PATCH Department Failed")
+	}
+
 	employee := &models.Employee{
 		IdentityNumber:   req.IdentityNumber,
 		Name:             req.Name,
 		EmployeeImageURI: req.EmployeeImageURI,
 		Gender:           req.Gender,
-		DepartmentID:     req.DepartmentID,
+		DepartmentID:     departID,
 	}
 
 	return s.repo.Create(ctx, employee)

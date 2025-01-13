@@ -3,7 +3,7 @@ package routes
 import (
 	"database/sql"
 	"net/http"
-	"strings"
+	"path"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -64,9 +64,9 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	mux.Handle("/v1/employee/", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Extract identityNumber from path
-			identityNumber := strings.TrimPrefix(r.URL.Path, "/v1/employee/")
-			if identityNumber == "" {
-				http.Error(w, "Missing employee identity number", http.StatusBadRequest)
+			identityNumber := path.Base(r.URL.Path)
+			if identityNumber == "" || identityNumber == "employee" {
+				utils.SendErrorResponse(w, "Employee ID is required", http.StatusNotFound)
 				return
 			}
 
