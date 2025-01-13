@@ -3,6 +3,8 @@ package validators
 import (
 	"errors"
 	"net/url"
+	"regexp"
+	"strings"
 )
 
 func ValidateURI(uri string) error {
@@ -19,6 +21,17 @@ func ValidateURI(uri string) error {
 	// Check if the host is present
 	if parsedURI.Host == "" {
 		return errors.New("Missing host in URI")
+	}
+
+	components := strings.Split(uri, ".")
+	if len(components) < 2 {
+		return errors.New("Missing domain in URI")
+	}
+
+	emailRegex := `^[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$`
+	re := regexp.MustCompile(emailRegex)
+	if !re.MatchString(parsedURI.Host) {
+		return errors.New("Invalid uri format")
 	}
 
 	return nil

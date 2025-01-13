@@ -2,6 +2,7 @@ package validators
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -11,11 +12,11 @@ type EmailValidator interface {
 
 func ValidateEmail(email string) error {
 	// Regex structure validation
-	// emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	// re := regexp.MustCompile(emailRegex)
-	// if !re.MatchString(email) {
-	// 	return errors.New("Invalid email format")
-	// }
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$`
+	re := regexp.MustCompile(emailRegex)
+	if !re.MatchString(email) {
+		return errors.New("Invalid email format")
+	}
 
 	// Parsing email using net/mail
 	// _, err := mail.ParseAddress(email)

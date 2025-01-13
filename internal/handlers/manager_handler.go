@@ -51,20 +51,50 @@ func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var input utils.ManagerRequest
 	if r.Method != http.MethodPatch {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "application/json" {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&input); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidEmail() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidCompanyName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidCompanyImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	claims, ok := r.Context().Value(constants.JWTKey).(*utils.Claims)
 	if !ok {
-		http.Error(w, "User not aunthenticated", http.StatusUnauthorized)
+		utils.SendErrorResponse(w, "User not aunthenticated", http.StatusUnauthorized)
 		return
 	}
 
@@ -79,12 +109,15 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 			utils.SendErrorResponse(w, "Email already registered", http.StatusConflict)
 			return
 		case utils.InvalidEmailFormat:
+			log.Println("Invalid Email")
 			utils.SendErrorResponse(w, "Invalid email format", http.StatusBadRequest)
 			return
 		case utils.InvalidPasswordLength:
+			log.Println("InvalidPasswordLength")
 			utils.SendErrorResponse(w, "Invalid password length (min length: 8, max length: 32)", http.StatusBadRequest)
 			return
 		case utils.InvalidNameLength:
+			log.Println("Invalid Name")
 			utils.SendErrorResponse(w, "Invalid name length (min length: 4, max length: 52)", http.StatusBadRequest)
 			return
 		default:

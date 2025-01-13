@@ -9,8 +9,8 @@ import (
 )
 
 func TestValidateURI_Valid(t *testing.T) {
-	uri1 := "http://127.0.0.1:8080"
-	uri2 := "https://127.0.0.1:8080"
+	uri1 := "http://projectsprint-bucket-public-read.s3.ap-southeast-1.amazonaws.com/ngikut/gogomanager/c7feabe3-1bb7-4bd6-838d-3994dac2fa22.png"
+	uri2 := "https://projectsprint-bucket-public-read.s3.ap-southeast-1.amazonaws.com/ngikut/gogomanager/c7feabe3-1bb7-4bd6-838d-3994dac2fa22.png"
 
 	err1 := validators.ValidateURI(uri1)
 	err2 := validators.ValidateURI(uri2)
