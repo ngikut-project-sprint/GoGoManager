@@ -25,7 +25,7 @@ type departmentService struct {
 
 // First, make sure your DepartmentResponse struct is defined correctly
 type DepartmentResponse struct {
-	DepartmentId int    `json:"department_id"` // Change type to int to match Department.ID
+	DepartmentId int    `json:"departmentId"` // Change type to int to match Department.ID
 	Name         string `json:"name"`
 }
 

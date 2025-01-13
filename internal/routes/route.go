@@ -93,9 +93,9 @@ func DepartmentRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	service := services.NewDepartmentService(repo)
 	handler := handlers.NewDepartmentHandler(service)
 
-	mux.Handle("/department", middleware.ConfigMiddleware(cfg,
+	mux.Handle("/v1/department", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartment))))
-	mux.Handle("/department/", middleware.ConfigMiddleware(cfg,
+	mux.Handle("/v1/department/", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartmentWithID))))
 }
 
