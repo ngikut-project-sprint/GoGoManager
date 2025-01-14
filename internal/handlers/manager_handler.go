@@ -109,15 +109,12 @@ func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 			utils.SendErrorResponse(w, "Email already registered", http.StatusConflict)
 			return
 		case utils.InvalidEmailFormat:
-			log.Println("Invalid Email")
 			utils.SendErrorResponse(w, "Invalid email format", http.StatusBadRequest)
 			return
 		case utils.InvalidPasswordLength:
-			log.Println("InvalidPasswordLength")
 			utils.SendErrorResponse(w, "Invalid password length (min length: 8, max length: 32)", http.StatusBadRequest)
 			return
 		case utils.InvalidNameLength:
-			log.Println("Invalid Name")
 			utils.SendErrorResponse(w, "Invalid name length (min length: 4, max length: 52)", http.StatusBadRequest)
 			return
 		default:
