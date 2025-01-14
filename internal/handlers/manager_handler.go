@@ -51,20 +51,50 @@ func (h *ManagerHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 func (h *ManagerHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var input utils.ManagerRequest
 	if r.Method != http.MethodPatch {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "application/json" {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&input); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidEmail() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidCompanyName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !input.ValidCompanyImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	claims, ok := r.Context().Value(constants.JWTKey).(*utils.Claims)
 	if !ok {
-		http.Error(w, "User not aunthenticated", http.StatusUnauthorized)
+		utils.SendErrorResponse(w, "User not aunthenticated", http.StatusUnauthorized)
 		return
 	}
 

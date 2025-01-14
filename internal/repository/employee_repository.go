@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/ngikut-project-sprint/GoGoManager/internal/constants"
 	"github.com/ngikut-project-sprint/GoGoManager/internal/models"
@@ -45,20 +46,26 @@ func (r *employeeRepository) List(ctx context.Context, filter models.FilterOptio
 	argCount := 2                    // Start from 2 since we used $1 for manager_id
 
 	if filter.IdentityNumber != nil {
-		query += fmt.Sprintf(" AND identity_number LIKE $%d", argCount)
+		query += fmt.Sprintf(" AND e.identity_number LIKE $%d", argCount)
 		args = append(args, "%"+*filter.IdentityNumber+"%")
 		argCount++
 	}
 
 	if filter.Gender != nil {
-		query += fmt.Sprintf(" AND gender = $%d", argCount)
+		query += fmt.Sprintf(" AND e.gender = $%d", argCount)
 		args = append(args, *filter.Gender)
 		argCount++
 	}
 
 	if filter.DepartmentID != nil {
-		query += fmt.Sprintf(" AND department_id = $%d", argCount)
+		query += fmt.Sprintf(" AND e.department_id = $%d", argCount)
 		args = append(args, *filter.DepartmentID)
+		argCount++
+	}
+
+	if filter.Name != nil {
+		query += fmt.Sprintf(" AND e.name LIKE $%d", argCount)
+		args = append(args, "%"+*filter.Name+"%")
 		argCount++
 	}
 
@@ -127,6 +134,7 @@ func (r *employeeRepository) Create(ctx context.Context, employee *models.Employ
 		&employee.DeletedAt,
 	)
 	if err != nil {
+		log.Println("error repo: ", err.Error())
 		return nil, fmt.Errorf("error creating employee: %w", err)
 	}
 

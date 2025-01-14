@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/ngikut-project-sprint/GoGoManager/internal/validators"
+import (
+	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
+)
 
 type ManagerResponse struct {
 	Email           string `json:"email"`

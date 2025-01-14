@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,7 +24,7 @@ type EmployeeResponse struct {
 	Name             string `json:"name"`
 	EmployeeImageUri string `json:"employeeImageUri"`
 	Gender           string `json:"gender"`
-	DepartmentId     int    `json:"departmentId"`
+	DepartmentId     string `json:"departmentId"`
 }
 
 func NewEmployeeHandler(service services.EmployeeService) *EmployeeHandler {
@@ -67,6 +69,10 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if name := r.URL.Query().Get("name"); name != "" {
+		filter.Name = &name
+	}
+
 	employees, err := h.service.List(r.Context(), filter)
 	if err != nil {
 		utils.SendErrorResponse(w, "Internal server error", http.StatusInternalServerError)
@@ -80,16 +86,13 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 			Name:             emp.Name,
 			EmployeeImageUri: emp.EmployeeImageURI,
 			Gender:           string(emp.Gender),
-			DepartmentId:     emp.DepartmentID,
+			DepartmentId:     strconv.Itoa(emp.DepartmentID),
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(utils.Response{
-		Data:    response,
-		Message: fmt.Sprintf("Successfully retrieved %d employees", len(response)),
-	}); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 		return
@@ -97,12 +100,75 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("Content-Type") != "application/json" {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	r.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
+	// Decode JSON body into a map
+	var body map[string]interface{}
+	var decoder = json.NewDecoder(bytes.NewReader(bodyBytes))
+	if err := decoder.Decode(&body); err != nil {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Example checking for a specific field, e.g., "value"
+	value, exists := body["departmentId"]
+	if !exists {
+		utils.SendErrorResponse(w, "Missing Depatment ID", http.StatusBadRequest)
+		return
+	}
+
+	if _, isString := value.(string); !isString {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	fmt.Println("masuk")
+	fmt.Println()
 	var req models.CreateEmployeeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	decoder1 := json.NewDecoder(bytes.NewReader(bodyBytes))
+	decoder.DisallowUnknownFields()
+	if err := decoder1.Decode(&req); err != nil {
+		fmt.Println("decode ", err.Error())
 		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
+
+	if !req.ValidIdentityNumber() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidGender() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidDepartmentId() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("masuk sini")
 
 	// Create new employee
 	employee, err := h.service.Create(r.Context(), req)
@@ -122,15 +188,12 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Name:             employee.Name,
 		EmployeeImageUri: employee.EmployeeImageURI,
 		Gender:           string(employee.Gender),
-		DepartmentId:     employee.DepartmentID,
+		DepartmentId:     strconv.Itoa(employee.DepartmentID),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(utils.Response{
-		Data:    response,
-		Message: fmt.Sprintf("Employee with ID %s created successfully", response.IdentityNumber),
-	}); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 		return
@@ -138,18 +201,55 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identityNumber string) {
+	if r.Header.Get("Content-Type") != "application/json" {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
 	// Decode request body
 	var req models.UpdateEmployeeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&req); err != nil {
 		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
 
+	if !req.ValidIdentityNumber() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidName() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidImageURI() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidGender() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !req.ValidDepartmentId() {
+		utils.SendErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
 	// Update employee
 	employee, err := h.service.Update(r.Context(), identityNumber, req)
 	if err != nil {
-		utils.SendErrorResponse(w, "Failed to update employee", http.StatusInternalServerError)
+		switch {
+		case strings.Contains(err.Error(), "employee not found"):
+			utils.SendErrorResponse(w, "employee not found", http.StatusNotFound)
+		default:
+			utils.SendErrorResponse(w, "Failed to create employee", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -159,15 +259,12 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request, identit
 		Name:             employee.Name,
 		EmployeeImageUri: employee.EmployeeImageURI,
 		Gender:           string(employee.Gender),
-		DepartmentId:     employee.DepartmentID,
+		DepartmentId:     strconv.Itoa(employee.DepartmentID),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(utils.Response{
-		Data:    response,
-		Message: fmt.Sprintf("Employee with ID %s updated successfully", response.IdentityNumber),
-	}); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		utils.SendErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 		return

@@ -3,7 +3,7 @@ package routes
 import (
 	"database/sql"
 	"net/http"
-	"strings"
+	"path"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -23,8 +23,11 @@ func NewRouter(cfg *config.Config, db *sql.DB) *http.ServeMux {
 	ManagerRouter(mux, cfg, db)
 	DepartmentRouter(mux, cfg, db)
 	EmployeeRouter(mux, cfg, db)
+	FileRouter(mux, cfg)
+
 	return mux
 }
+
 func ManagerRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	dbAdapter := &database.SqlDBAdapter{DB: db}
 	repo := repository.NewManagerRepository(dbAdapter, bcrypt.GenerateFromPassword)
@@ -61,9 +64,9 @@ func EmployeeRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
 	mux.Handle("/v1/employee/", middleware.ConfigMiddleware(cfg,
 		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Extract identityNumber from path
-			identityNumber := strings.TrimPrefix(r.URL.Path, "/v1/employee/")
-			if identityNumber == "" {
-				http.Error(w, "Missing employee identity number", http.StatusBadRequest)
+			identityNumber := path.Base(r.URL.Path)
+			if identityNumber == "" || identityNumber == "employee" {
+				utils.SendErrorResponse(w, "Employee ID is required", http.StatusNotFound)
 				return
 			}
 
@@ -86,12 +89,18 @@ func AuthRouter(mux *http.ServeMux, cfg *config.Config, manager_service services
 }
 
 func DepartmentRouter(mux *http.ServeMux, cfg *config.Config, db *sql.DB) {
-    repo := repository.NewDepartmentRepository(db)
-    service := services.NewDepartmentService(repo)
-    handler := handlers.NewDepartmentHandler(service)
+	repo := repository.NewDepartmentRepository(db)
+	service := services.NewDepartmentService(repo)
+	handler := handlers.NewDepartmentHandler(service)
 
-    mux.Handle("/department", middleware.ConfigMiddleware(cfg, 
-        middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartment))))
-    mux.Handle("/department/", middleware.ConfigMiddleware(cfg, 
-        middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartmentWithID))))
+	mux.Handle("/v1/department", middleware.ConfigMiddleware(cfg,
+		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartment))))
+	mux.Handle("/v1/department/", middleware.ConfigMiddleware(cfg,
+		middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.HandleDepartmentWithID))))
+}
+
+func FileRouter(mux *http.ServeMux, cfg *config.Config) {
+	service := services.NewFileService(validators.ValidateFileSize, validators.ValidateFileType)
+	handler := handlers.NewFileHandler(service)
+	mux.Handle("/v1/file", middleware.ConfigMiddleware(cfg, middleware.AuthMiddleware(jwt.ParseWithClaims, http.HandlerFunc(handler.File))))
 }

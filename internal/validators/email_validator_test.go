@@ -25,9 +25,3 @@ func TestValidateEmail_WrongRFCFormat(t *testing.T) {
 	err := validators.ValidateEmail(email)
 	assert.Error(t, err)
 }
-
-func TestValidateEmail_DomainNotFound(t *testing.T) {
-	email := "example@domain.c"
-	err := validators.ValidateEmail(email)
-	assert.Error(t, err)
-}

@@ -201,6 +201,9 @@ func (r *managerRepository) Update(manager *utils.ManagerRequest) *utils.GoGoErr
 
 	_, err := r.db.Exec(query, params...)
 	if err != nil {
+		if uniqueErr := utils.UniqueConstraintError(err); uniqueErr != nil {
+			return utils.WrapError(err, utils.SQLUniqueViolated, "Email already registered")
+		}
 		return utils.WrapError(err, utils.SQLError, "Error updating manager")
 	}
 	return nil

@@ -34,12 +34,13 @@ CREATE TABLE employees (
   id SERIAL NOT NULL,
   identity_number VARCHAR(33) NOT NULL,
   name VARCHAR(33) NOT NULL,
-  employee_image_uri VARCHAR(33),
+  employee_image_uri TEXT,
   gender GENDER NOT NULL,
   department_id INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP DEFAULT NULL,
   PRIMARY KEY(id),
-  FOREIGN KEY (department_id) REFERENCES departments(department_id)
+  FOREIGN KEY (department_id) REFERENCES departments(department_id),
+  CONSTRAINT unique_identity_number UNIQUE (identity_number)
 );
