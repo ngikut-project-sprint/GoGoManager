@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"log"
-
 	"github.com/ngikut-project-sprint/GoGoManager/internal/validators"
 )
 
@@ -54,7 +52,6 @@ func (m ManagerRequest) ValidImageURI() bool {
 	}
 
 	err := validators.ValidateURI(*m.UserImageUri)
-	log.Println("image uri error", err)
 	return m.UserImageUri != nil && err == nil
 }
 
